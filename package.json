@@ -1,0 +1,24 @@
+{
+    "name": "map-implementations",
+    "version": "1.0.0",
+    "description": "Implementations of various Map proposals",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "prepare": "npm run build",
+        "build": "rimraf dist && tsc -b"
+    },
+    "keywords": [
+        "map",
+        "proposal",
+        "polyfill"
+    ],
+    "author": "Bread",
+    "license": "ISC",
+    "dependencies": {
+        "typescript": "^4.1.3"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
+}
