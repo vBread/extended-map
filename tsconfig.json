@@ -9,9 +9,12 @@
         "declaration": true,
         "declarationDir": "dist",
         "esModuleInterop": true
-    },
+	},
+	"exclude": [
+		"node_modules", 
+		"tests/*"
+	],
     "include": [
-        "index.ts",
-        "index.test.ts"
+        "src/*"
     ]
 }

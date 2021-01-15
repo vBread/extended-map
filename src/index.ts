@@ -1,12 +1,16 @@
-interface EmplaceHandler<K, V> {
-    insert?(key?: K, map?: ExtendedMap<K, V>): V
-    update?(value?: V, key?: K, map?: ExtendedMap<K, V>): any
-}
+import { EmplaceHandler } from './types'
+export { EmplaceHandler }
 
 export class ExtendedMap<K, V> extends Map<K, V> {
     public constructor(entries?: ReadonlyArray<readonly [K, V]>) {
         super(entries)
-    }
+	}
+	
+	public static isMap(arg: any): arg is Map<any, any>
+	public static isMap<K, V>(arg: any): arg is Map<K, V>
+	public static isMap(arg: any): arg is Map<any, any> {
+		return arg[Symbol.toStringTag] === 'Map'
+	}
 
     public static groupBy<T = any>(iterable: Iterable<T>, keyDerivative: (value: T) => any): ExtendedMap<any, T[]> {
         const map = new ExtendedMap<any, T[]>()
@@ -40,34 +44,32 @@ export class ExtendedMap<K, V> extends Map<K, V> {
     public static of(...args: [any, any][]): ExtendedMap<any, any>
     public static of<K, V>(...args: [K, V][]): ExtendedMap<K, V>
     public static of<K, V>(...args: [K, V][]): ExtendedMap<K, V> {
-        const array: [K, V][] = []
+        const entries: [K, V][] = []
 
         while (args.length--) {
-            array[args.length] = args[args.length]
+            entries[args.length] = args[args.length]
         }
 
-        return new ExtendedMap(array)
+        return new ExtendedMap(entries)
     }
 
     public static from<T, K = any, V = any>(iterable: Iterable<T>): ExtendedMap<K, V>
-    public static from<T, K = any, V = any>(iterable: Iterable<T>, mapFn: (value: T, index: number) => [K, V]): ExtendedMap<K, V>
-    public static from<K = any, V = any>(iterable: Iterable<any>, mapFn?: (value: any, index: number) => [K, V]): ExtendedMap<K, V>
-    public static from<U, T, K = any, V = any>(iterable: Iterable<T>, mapFn: (value: T, index: number) => [K, V], thisArg: U): ExtendedMap<K, V>
-    public static from<K = any, V = any>(iterable: Iterable<any>, mapFn?: (value: any, index: number) => [K, V], thisArg?: any): ExtendedMap<K, V> {
-        mapFn = thisArg ? mapFn.bind(thisArg) : mapFn
-
-        const array: [K, V][] = []
+    public static from<T, K = any, V = any>(iterable: Iterable<T>, mapfn: (value: T, index: number) => [K, V]): ExtendedMap<K, V>
+    public static from<K = any, V = any>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => [K, V]): ExtendedMap<K, V>
+    public static from<U, T, K = any, V = any>(iterable: Iterable<T>, mapfn: (value: T, index: number) => [K, V], thisArg: U): ExtendedMap<K, V>
+    public static from<K = any, V = any>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => [K, V], thisArg: any = this): ExtendedMap<K, V> {
+        const entries: [K, V][] = []
         let i = 0
 
         for (const item of iterable) {
-            if (mapFn) {
-                array.push(mapFn(item, i++))
+            if (mapfn) {
+                entries.push(mapfn.call(thisArg, item, i++))
             } else {
-                array.push.bind(array)
+                entries.push(item)
             }
         }
 
-        return new ExtendedMap(array)
+        return new ExtendedMap(entries)
     }
 
     public emplace(key: K, handler: EmplaceHandler<K, V>): V {
@@ -94,11 +96,9 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
     public find(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean): V | undefined
     public find<T>(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: T): V | undefined
-    public find(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg?: any): V | undefined {
-        predicate = thisArg ? predicate.bind(thisArg) : predicate
-        
+    public find(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: any = this): V | undefined {
         for (const [key, value] of this) {
-            if (predicate(value, key, this)) {
+            if (predicate.call(thisArg, value, key, this)) {
                 return value
             }
         }
@@ -108,17 +108,29 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
     public findKey(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean): K | undefined
     public findKey<T>(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: T): K | undefined
-    public findKey(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg?: any): K | undefined {
-        predicate = thisArg ? predicate.bind(thisArg) : predicate
-
+    public findKey(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: any = this): K | undefined {
         for (const [key, value] of this) {
-            if (predicate(value, key, this)) {
+            if (predicate.call(thisArg, value, key, this)) {
                 return key
             }
         }
 
         return undefined
-    }
+	}
+	
+	public at(index: number): [K, V] | undefined {
+		index = Math.trunc(index) ?? 0
+
+		if (index < 0) {
+			index += this.size
+		}
+
+		if (index < 0 || index >= this.size) {
+			return undefined
+		}
+
+		return Array.from(this)[index]
+	}
 
     public includes(searchElement: V): boolean {
         for (const value of this.values()) {
@@ -169,11 +181,9 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
     public every(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean): boolean
     public every<T>(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: T): boolean
-    public every(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg?: any): boolean {
-        predicate = thisArg ? predicate.bind(thisArg) : predicate
-
+    public every(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: any = this): boolean {
         for (const [key, value] of this) {
-            if (!predicate(value, key, this)) {
+            if (!predicate.call(thisArg, value, key, this)) {
                 return false
             }
         }
@@ -185,13 +195,11 @@ export class ExtendedMap<K, V> extends Map<K, V> {
     public map<T>(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => T): ExtendedMap<K, V>
     public map<U>(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any, thisArg: U): ExtendedMap<K, V>
     public map<T, U>(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => T, thisArg: U): ExtendedMap<K, V>
-    public map(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any, thisArg?: any): ExtendedMap<K, V> {
-        callbackfn = thisArg ? callbackfn.bind(thisArg) : callbackfn
-
+    public map(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any, thisArg: any = this): ExtendedMap<K, V> {
         const map = new ExtendedMap<K, V>()
 
         for (const [key, value] of this) {
-            map.set(key, callbackfn(value, key, this))
+            map.set(key, callbackfn.call(thisArg, value, key, this))
         }
 
         return map
@@ -201,13 +209,11 @@ export class ExtendedMap<K, V> extends Map<K, V> {
     public mapKeys<T>(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => T): ExtendedMap<K, V>
     public mapKeys<U>(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any, thisArg: U): ExtendedMap<K, V>
     public mapKeys<T, U>(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => T, thisArg: U): ExtendedMap<K, V>
-    public mapKeys(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any, thisArg?: any): ExtendedMap<K, V> {
-        callbackfn = thisArg ? callbackfn.bind(thisArg) : callbackfn
-
+    public mapKeys(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any, thisArg: any = this): ExtendedMap<K, V> {
         const map = new ExtendedMap<K, V>()
 
         for (const [key, value] of this) {
-            map.set(callbackfn(value, key, this), value)
+            map.set(callbackfn.call(thisArg, value, key, this), value)
         }
 
         return map
@@ -215,20 +221,31 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
     public filter(predicate: (value: V, key: K, map: this) => boolean): ExtendedMap<K, V>
     public filter<T>(predicate: (value: V, key: K, map: this) => boolean, thisArg: T): ExtendedMap<K, V>
-    public filter(predicate: (value: V, key: K, map: this) => boolean, thisArg?: any): ExtendedMap<K, V> {
-        predicate = thisArg ? predicate.bind(thisArg) : predicate
-
+    public filter(predicate: (value: V, key: K, map: this) => boolean, thisArg: any = this): ExtendedMap<K, V> {
         const map = new ExtendedMap<K, V>()
 
         for (const [key, value] of this) {
-            if (predicate(value, key, this)) {
+            if (predicate.call(thisArg, value, key, this)) {
                 map.set(key, value)
             }
         }
 
         return map
+	}
+	
+	public filterOut(predicate: (value: V, key: K, map: this) => boolean): ExtendedMap<K, V>
+    public filterOut<T>(predicate: (value: V, key: K, map: this) => boolean, thisArg: T): ExtendedMap<K, V>
+    public filterOut(predicate: (value: V, key: K, map: this) => boolean, thisArg: any = this): ExtendedMap<K, V> {
+        const map = new ExtendedMap<K, V>()
 
-    }
+        for (const [key, value] of this) {
+            if (!predicate.call(thisArg, value, key, this)) {
+                map.set(key, value)
+            }
+		}
+
+        return map
+	}
 
     public reduce<T>(callbackfn: (memo: T, value: V, key: K, map: ExtendedMap<K, V>) => T): T
     public reduce<T>(callbackfn: (memo: T, value: V, key: K, map: ExtendedMap<K, V>) => T, initialValue: T): T
@@ -250,15 +267,84 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
     public some(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean): boolean
     public some<T>(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: T): boolean
-    public some(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg?: any): boolean {
-        predicate = thisArg ? predicate.bind(thisArg) : predicate
-
+    public some(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: any = this): boolean {
         for (const [key, value] of this) {
-            if (predicate(value, key, this)) {
+            if (predicate.call(thisArg, value, key, this)) {
                 return true
             }
         }
 
         return false
-    }
+	}
+	
+	public uniqueBy(): ExtendedMap<K, V>
+	public uniqueBy(valueResolver: string | number): ExtendedMap<K, V>
+	public uniqueBy(valueResolver: (value: V) => any): ExtendedMap<K, V>
+	public uniqueBy<T>(valueResolver: (value: V) => T): ExtendedMap<K, V>
+	public uniqueBy(valueResolver?: ((value: V) => any) | string | number): ExtendedMap<K, V> {
+		const map = new ExtendedMap<K, V>()
+		const tmp = new ExtendedMap()
+
+		if (!valueResolver) {
+			for (const value of [...new Set(this.values())]) {
+				map.set(this.keyOf(value), value)
+			}
+
+			return map
+		}
+
+		const key = typeof valueResolver !== 'function' && valueResolver
+
+		valueResolver = key 
+			? (value: Record<string | number, any>) => value?.[key] ?? value 
+			: valueResolver
+
+		for (const [key, value] of this.entries()) {
+			const resolved = (valueResolver as Function)(value)
+
+			tmp.emplace(resolved, {
+				insert: () => [key, value] as any
+			})
+		}
+		
+		for (const [key, value] of tmp.values() as any) {
+			map.set(key, value)
+		}
+
+		return map
+	}
+
+	public random(): V
+	public random(amount: number): V[]
+	public random(amount: number = 1): V | V[] {
+		const entries = Array.from(this.values())
+		const results = []
+
+		for (let i = 0; i < amount; i++) {
+			results.push(entries[Math.floor(Math.random() * entries.length)])
+		}
+
+		if (results.length <= 1) {
+			return results[1] ?? results[0]
+		}
+
+		return results
+	}
+
+	public randomKey(): K
+	public randomKey(amount: number): K[]
+	public randomKey(amount: number = 1): K | K[] {
+		const entries = Array.from(this.keys())
+		const results = []
+
+		for (let i = 0; i < amount; i++) {
+			results.push(entries[Math.floor(Math.random() * entries.length)])
+		}
+
+		if (results.length <= 1) {
+			return results[1] ?? results[0]
+		}
+
+		return results
+	}
 }
