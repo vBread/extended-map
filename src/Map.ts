@@ -326,9 +326,9 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 			})
 		}
 		
-		for (const [key, value] of tmp.values() as any) {
-			map.set(key, value)
-		}
+	public toJSON(): string {
+		return JSON.stringify(Object.fromEntries(this));
+	}
 
 		return map
 	}
