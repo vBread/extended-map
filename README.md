@@ -23,7 +23,6 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Map.prototype.every`](https://tc39.es/proposal-collection-methods/#Map.prototype.every)
 - [`Map.prototype.filter`](https://tc39.es/proposal-collection-methods/#Map.prototype.filter)
 - [`Map.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)††
-- `Map.prototype.filterValues`
 - [`Map.prototype.findKey`](https://tc39.es/proposal-collection-methods/#Map.prototype.findKey)
 - [`Map.prototype.find`](https://tc39.es/proposal-collection-methods/#Map.prototype.find)
 - `Map.prototype.first`
