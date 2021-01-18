@@ -142,13 +142,14 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
         return undefined
 	}
-	
-	public at(index: number): [K, V] | undefined {
-		index = Math.trunc(index) ?? 0
 
-		if (index < 0) {
-			index += this.size
-		}
+	public first(): V | undefined {
+		return this.values().next().value;
+	}
+
+	public firstKey(): K | undefined {
+		return this.keys().next().value;
+	}
 
 	public get(key: K): V {
 		return super.get(this.coerceKey?.(key) ?? key);
@@ -178,18 +179,13 @@ export class ExtendedMap<K, V> extends Map<K, V> {
         return undefined
     }
 
-    public merge(...iterables: Iterable<[K, V]>[]): ExtendedMap<K, V>
-    public merge<T>(...iterables: Iterable<T>[]): ExtendedMap<K, V>
-    public merge(...iterables: Iterable<any>[]): ExtendedMap<K, V>
-    public merge(...iterables: Iterable<any>[]): ExtendedMap<K, V> {
-        for (const iterable of iterables) {
-            for (const [key, value] of iterable) {
-                this.set(key, value)
-            }
-        }
+	public last(): V | undefined {
+		return this.at(-1)[1];
+	}
 
-        return this
-    }
+	public lastKey(): K | undefined {
+		return this.at(-1)[0];
+	}
 
     public deleteAll(...keys: K[]): boolean {
         let finished = true
