@@ -33,10 +33,19 @@ export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
         return new ExtendedWeakMap<K, V>(entries)
     }
 
-	public static isWeakMap(arg: any): arg is WeakMap<any, any>
-	public static isWeakMap<K extends object, V>(arg: any): arg is WeakMap<K, V>
+	public static isWeakMap(arg: any): arg is WeakMap<any, any>;
+	public static isWeakMap<K extends object, V>(arg: any): arg is WeakMap<K, V>;
 	public static isWeakMap(arg: any): arg is WeakMap<any, any> {
-		return arg[Symbol.toStringTag] === 'WeakMap'
+		const methods = ['get', 'set', 'delete', 'has'];
+
+		// prettier-ignore
+		return (
+			arg
+			&& !('size' in arg)
+			&& arg[Symbol.toStringTag] === 'WeakMap'
+			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
+		)
+	}
 	}
 
 	public deleteAll(...keys: K[]): boolean {

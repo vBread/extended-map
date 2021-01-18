@@ -29,10 +29,19 @@ export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
         return new ExtendedWeakSet<T>(entries)
     }
 
-	public static isWeakSet(arg: any): arg is ExtendedWeakSet<any>
-	public static isWeakSet<T extends object>(arg: any): arg is ExtendedWeakSet<T>
+	public static isWeakSet(arg: any): arg is ExtendedWeakSet<any>;
+	public static isWeakSet<T extends object>(arg: any): arg is ExtendedWeakSet<T>;
 	public static isWeakSet(arg: any): arg is ExtendedWeakSet<any> {
-		return arg[Symbol.toStringTag] === 'WeakSet'
+		const methods = ['add', 'has', 'delete'];
+
+		// prettier-ignore
+		return (
+			arg
+			&& !('size' in arg)
+			&& arg[Symbol.toStringTag] === 'WeakSet'
+			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
+		)
+	}
 
 	public add(value: T): this {
 		return super.add(this.coerceValue?.(value) ?? value);

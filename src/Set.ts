@@ -12,15 +12,18 @@ export class ExtendedSet<T> extends Set<T> {
 
 	public static isSet(arg: any): arg is Set<any>
 	public static isSet<T>(arg: any): arg is Set<T>
+	public static isSet(arg: any): arg is Set<any>;
+	public static isSet<T>(arg: any): arg is Set<T>;
 	public static isSet(arg: any): arg is Set<any> {
 		const methods = ['has', 'add', 'forEach', 'delete', 'keys', 'values', 'entries', 'clear'];
 
+		// prettier-ignore
 		return (
-			arg 
-			&& 'size' in arg 
-			&& typeof arg.size === 'number' 
+			arg
+			&& 'size' in arg
+			&& typeof arg.size === 'number'
 			&& arg[Symbol.toStringTag] === 'Set'
-			&& methods.every((method) => method in arg && typeof arg[method] === 'function') 
+			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
 		)
 	}
 

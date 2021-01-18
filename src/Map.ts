@@ -41,7 +41,7 @@ export class ExtendedMap<K, V> extends Map<K, V> {
             })
         }
 
-        return map
+	public static isMap(arg: any): arg is Map<any, any>;
     }
 
     public static keyBy(iterable: Iterable<any>): ExtendedMap<any, any[]>
