@@ -312,25 +312,16 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 			return map
 		}
 
-		const key = typeof valueResolver !== 'function' && valueResolver
+	public toArray(): V[] {
+		return [...this.values()];
+	}
 
-		valueResolver = key 
-			? (value: Record<string | number, any>) => value?.[key] ?? value 
-			: valueResolver
-
-		for (const [key, value] of this.entries()) {
-			const resolved = (valueResolver as Function)(value)
-
-			tmp.emplace(resolved, {
-				insert: () => [key, value] as any
-			})
-		}
-		
 	public toJSON(): string {
 		return JSON.stringify(Object.fromEntries(this));
 	}
 
-		return map
+	public toKeyArray(): K[] {
+		return [...this.keys()];
 	}
 
 	public random(): V
