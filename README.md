@@ -5,6 +5,8 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 <!-- markdownlint-disable-next-line -->
 # Map\*
 
+[`new Map([iterable[, handler]])`](https://tc39.es/proposal-collection-normalization/#normalization-ops)
+
 ## Static
 
 - [`Map.from`](https://tc39.es/proposal-setmap-offrom/#sec-map.from)
@@ -24,8 +26,12 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - `Map.prototype.filterValues`
 - [`Map.prototype.findKey`](https://tc39.es/proposal-collection-methods/#Map.prototype.findKey)
 - [`Map.prototype.find`](https://tc39.es/proposal-collection-methods/#Map.prototype.find)
+- `Map.prototype.first`
+- `Map.prototype.firstKey`
 - [`Map.prototype.includes`](https://tc39.es/proposal-collection-methods/#Map.prototype.includes)
 - [`Map.prototype.keyOf`](https://tc39.es/proposal-collection-methods/#Map.prototype.keyOf)
+- `Map.prototype.last`
+- `Map.prototype.lastKey`
 - [`Map.prototype.mapKeys`](https://tc39.es/proposal-collection-methods/#Map.prototype.mapKeys)
 - [`Map.prototype.mapValues`](https://tc39.es/proposal-collection-methods/#Map.prototype.mapValues)†
 - [`Map.prototype.merge`](https://tc39.es/proposal-collection-methods/#Map.prototype.merge)
@@ -34,6 +40,7 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Map.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Map.prototype.reduce)
 - [`Map.prototype.some`](https://tc39.es/proposal-collection-methods/#Map.prototype.some)
 - `Map.prototype.toArray`
+- `Map.prototype.toJSON`
 - `Map.prototype.toKeyArray`
 - [`Map.prototype.uniqueBy`](https://github.com/tc39/proposal-array-unique)††
 
@@ -43,16 +50,12 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 
 ## Planned
 
-- [`MapConstructor { coerceKey, coerceValue }`](https://tc39.es/proposal-collection-normalization/)
-- `Map.prototype.first`
-- `Map.prototype.firstKey`
 - `Map.prototype.flat`
-- `Map.prototype.last`
-- `Map.prototype.lastKey`
-- `Map.prototype.toJSON`
 
 <!-- markdownlint-disable-next-line -->
 # Set
+
+[`new Set([iterable[, coerceValue]])`](https://tc39.es/proposal-collection-normalization/#normalization-ops)
 
 <!-- markdownlint-disable-next-line -->
 ## Static
@@ -87,7 +90,6 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 <!-- markdownlint-disable-next-line -->
 ## Planned
 
-- [`SetConstructor { coerceValue }`](https://tc39.es/proposal-collection-normalization/)
 - `Set.prototype.at`
 - `Set.prototype.first`
 - `Set.prototype.flat`
@@ -95,6 +97,8 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
   
 <!-- markdownlint-disable-next-line -->
 # WeakMap
+
+[`new WeakMap([iterable[, handler]])`](https://tc39.es/proposal-collection-normalization/#normalization-ops)
 
 <!-- markdownlint-disable-next-line -->
 ## Static
@@ -111,6 +115,9 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 
 <!-- markdownlint-disable-next-line -->
 # WeakSet
+
+[`new WeakSet([iterable[, coerceValue]])`](https://tc39.es/proposal-collection-normalization/#normalization-ops)
+
 <!-- markdownlint-disable-next-line -->
 ## Static
 

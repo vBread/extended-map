@@ -10,11 +10,12 @@ export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
 		this.coerceValue = coerceValue;
 	}
 
-	public static from<U, T extends object = object>(iterable: Iterable<U>): ExtendedWeakSet<T>
-    public static from<U, T extends object = object>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T): ExtendedWeakSet<T>
-    public static from<T extends object = object>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T): ExtendedWeakSet<T>
-    public static from<U, S, T extends object = object>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T, thisArg: S): ExtendedWeakSet<T>
-    public static from<T extends object = object>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T, thisArg: any = this): ExtendedWeakSet<T> {
+	public static from<U, T extends object = object>(iterable: Iterable<U>): ExtendedWeakSet<T>;
+	public static from<U, T extends object = object>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T): ExtendedWeakSet<T>;
+	public static from<T extends object = object>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T): ExtendedWeakSet<T>;
+	public static from<U, S, T extends object = object>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T, thisArg: S): ExtendedWeakSet<T>;
+	// prettier-ignore
+	public static from<T extends object = object>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T, thisArg: any = this): ExtendedWeakSet<T> {
         const entries: T[] = []
         let i = 0
 
@@ -43,18 +44,37 @@ export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
 		)
 	}
 
+	public static of(...args: any[]): ExtendedWeakSet<any>;
+	public static of<T extends object>(...args: T[]): ExtendedWeakSet<T>;
+	public static of<T extends object>(...args: T[]): ExtendedWeakSet<T> {
+		return new ExtendedWeakSet<T>(args);
+	}
+
 	public add(value: T): this {
 		return super.add(this.coerceValue?.(value) ?? value);
 	}
+
+	public addAll(...values: T[]): ExtendedWeakSet<T> {
+		for (const value of values) {
+			this.add(value);
+		}
+
+		return this;
+	}
+
 	public delete(value: T): boolean {
 		return super.delete(this.coerceValue?.(value) ?? value);
 	}
 
-	public addAll() {
+	public deleteAll(...values: T[]): boolean {
+		let finished = true;
 
+		for (const value of values) {
+			finished = finished && this.delete(value);
+		}
+
+		return !!finished;
 	}
-
-	public deleteAll() {
 
 	public has(value: T): boolean {
 		return super.has(this.coerceValue?.(value) ?? value);

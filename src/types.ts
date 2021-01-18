@@ -1,11 +1,11 @@
 import { ExtendedMap } from './Map';
 import { ExtendedWeakMap } from './WeakMap';
 
-type MapLike<K, V> = K extends object ? ExtendedWeakMap<K, V> : ExtendedMap<K, V>
+type MapLike<K, V> = K extends object ? ExtendedWeakMap<K, V> : ExtendedMap<K, V>;
 
 export interface EmplaceHandler<K, V> {
-    insert?(key?: K, map?: MapLike<K, V>): V
-    update?(value?: V, key?: K, map?: MapLike<K, V>): any
+	insert?(key?: K, map?: MapLike<K, V>): V;
+	update?(value?: V, key?: K, map?: MapLike<K, V>): any;
 }
 
 export interface CoercionHandler<K, V> {
