@@ -1,4 +1,4 @@
-# Better Collections
+# Extended Collections
 
 Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/core-js#new-collections-methods), including additional utility methods adapted from other languages, such as [C#](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1?view=net-5.0), [Haskell](http://hackage.haskell.org/package/containers-0.5.10.2/docs/Data-Set.html), [Python](https://docs.python.org/3.6/library/stdtypes.html#set), [Hack](https://docs.hhvm.com/hack/reference/class/HH.Set/), and [Ruby](https://ruby-doc.org/stdlib-2.5.0/libdoc/set/rdoc/Set.html) to make Collections even more versatile.
 
