@@ -1,10 +1,17 @@
-import { EmplaceHandler } from './types'
+import { EmplaceHandler, CoercionHandler } from './types';
 
 export class ExtendedMap<K, V> extends Map<K, V> {
-    public constructor(iterable: Iterable<readonly [K, V]>)
-    public constructor(entries?: ReadonlyArray<readonly [K, V]>)
-    public constructor(entries?: ReadonlyArray<readonly [K, V]>) {
-        super(entries)
+	private readonly coerceKey: (key?: K) => K;
+	private readonly coerceValue: (value?: V) => V;
+
+	public constructor(iterable: Iterable<readonly [K, V]>);
+	public constructor(entries?: ReadonlyArray<readonly [K, V]>);
+	public constructor(entries: ReadonlyArray<readonly [K, V]>, handler: CoercionHandler<K, V>);
+	public constructor(entries?: ReadonlyArray<readonly [K, V]> | Iterable<readonly [K, V]>, handler?: CoercionHandler<K, V>) {
+		super(entries);
+
+		this.coerceKey = handler?.coerceKey;
+		this.coerceValue = handler?.coerceValue;
 	}
 	
 	public static isMap(arg: any): arg is Map<any, any>
@@ -75,19 +82,34 @@ export class ExtendedMap<K, V> extends Map<K, V> {
         return new ExtendedMap<K, V>(entries)
     }
 
-    public emplace(key: K, handler: EmplaceHandler<K, V>): V {
-        if (!('update' in handler) && !('insert' in handler)) {
-            throw new ReferenceError('At least one handler function must be provided')
-        }
+	public delete(key: K): boolean {
+		return super.delete(this.coerceKey?.(key) ?? key);
+	}
 
-        const value = (this.has(key) && 'update' in handler)
-            ? handler.update(this.get(key), key, this as any)
-            : handler.insert(key, this as any)
+	public deleteAll(...keys: K[]): boolean {
+		let finished = true;
 
-        this.set(key, value)
+		for (const key of keys) {
+			finished = finished && this.delete(key);
+		}
 
-        return value
-    }
+		return !!finished;
+	}
+
+	public emplace(key: K, handler: EmplaceHandler<K, V>): V {
+		if (!('update' in handler) && !('insert' in handler)) {
+			throw new ReferenceError('At least one callback must be provided');
+		}
+
+		const value =
+			this.has(key) && 'update' in handler
+				? handler.update(this.get(key), this.coerceKey?.(key) ?? key, this as any)
+				: handler.insert(this.coerceKey?.(key) ?? key, this as any);
+
+		this.set(key, value);
+
+		return value;
+	}
 
     public toArray(): V[] {
         return [...this.values()]
@@ -128,11 +150,12 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 			index += this.size
 		}
 
-		if (index < 0 || index >= this.size) {
-			return undefined
-		}
+	public get(key: K): V {
+		return super.get(this.coerceKey?.(key) ?? key);
+	}
 
-		return Array.from(this)[index]
+	public has(key: K): boolean {
+		return super.has(this.coerceKey?.(key) ?? key);
 	}
 
     public includes(searchElement: V): boolean {
@@ -261,8 +284,9 @@ export class ExtendedMap<K, V> extends Map<K, V> {
             }
         }
 
-        return accumulator
-    }
+	public set(key: K, value: V): this {
+		return super.set(this.coerceKey?.(key) ?? key, this.coerceValue?.(value) ?? value);
+	}
 
     public some(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean): boolean
     public some<T>(predicate: (value: V, key: K, map: ExtendedMap<K, V>) => boolean, thisArg: T): boolean

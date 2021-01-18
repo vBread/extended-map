@@ -1,8 +1,13 @@
 export class ExtendedSet<T> extends Set<T> {
-	public constructor(iterable?: Iterable<T>)
-	public constructor(values?: ReadonlyArray<T>)
-	public constructor(entries?: Iterable<T> | ReadonlyArray<T>) {
-		super(entries)
+	private readonly coerceValue: (value: T) => T;
+
+	public constructor(iterable?: Iterable<T>);
+	public constructor(values?: ReadonlyArray<T>);
+	public constructor(entries: Iterable<T> | ReadonlyArray<T>, coerceValue: (value: T) => T);
+	public constructor(entries?: Iterable<T> | ReadonlyArray<T>, coerceValue?: (value: T) => T) {
+		super(entries);
+
+		this.coerceValue = coerceValue;
 	}
 
 	public static isSet(arg: any): arg is Set<any>
@@ -25,9 +30,9 @@ export class ExtendedSet<T> extends Set<T> {
         return new ExtendedSet<T>(args)
 	}
 
-	public static from<U, T = any>(iterable: Iterable<U>): ExtendedSet<T>
-	public static from<U, T = any>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T): ExtendedSet<T>
-	public static from<T>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T): ExtendedSet<T>
+	public add(value: T): this {
+		return super.add(this.coerceValue?.(value) ?? value);
+	}
 	public static from<U, S, T = any>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T, thisArg: S): ExtendedSet<T>
 	public static from<T = any>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T, thisArg: any = this): ExtendedSet<T> {
 		const entries: T[] = []
@@ -41,7 +46,8 @@ export class ExtendedSet<T> extends Set<T> {
             }
         }
 
-        return new ExtendedSet<T>(entries)
+	public delete(value: T): boolean {
+		return super.delete(this.coerceValue?.(value) ?? value);
 	}
 
 	public filter(predicate: (value: T, key: T, set: this) => boolean): ExtendedSet<T>
@@ -128,8 +134,8 @@ export class ExtendedSet<T> extends Set<T> {
 		return false
 	}
 
-	public join(separator: string = ','): string {
-		return this.toArray().join(separator)
+	public has(value: T): boolean {
+		return super.has(this.coerceValue?.(value) ?? value);
 	}
 
 	public every(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean): boolean

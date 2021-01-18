@@ -1,14 +1,13 @@
 export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
-	public constructor(iterable: Iterable<T>)
-	public constructor(values?: ReadonlyArray<T>)
-	public constructor(entries?: Iterable<T> | ReadonlyArray<T>) {
-		super(entries)
-	}
+	private readonly coerceValue: (value: T) => T;
 
-	public static of(...args: any[]): ExtendedWeakSet<any>
-    public static of<T extends object>(...args: T[]): ExtendedWeakSet<T>
-    public static of<T extends object>(...args: T[]): ExtendedWeakSet<T> {
-        return new ExtendedWeakSet<T>(args)
+	public constructor(iterable: Iterable<T>);
+	public constructor(values?: ReadonlyArray<T>);
+	public constructor(entries: ReadonlyArray<T> | Iterable<T>, coerceValue: (value: T) => T);
+	public constructor(entries?: ReadonlyArray<T> | Iterable<T>, coerceValue?: (value: T) => T) {
+		super(entries);
+
+		this.coerceValue = coerceValue;
 	}
 
 	public static from<U, T extends object = object>(iterable: Iterable<U>): ExtendedWeakSet<T>
@@ -34,6 +33,12 @@ export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
 	public static isWeakSet<T extends object>(arg: any): arg is ExtendedWeakSet<T>
 	public static isWeakSet(arg: any): arg is ExtendedWeakSet<any> {
 		return arg[Symbol.toStringTag] === 'WeakSet'
+
+	public add(value: T): this {
+		return super.add(this.coerceValue?.(value) ?? value);
+	}
+	public delete(value: T): boolean {
+		return super.delete(this.coerceValue?.(value) ?? value);
 	}
 
 	public addAll() {
@@ -42,5 +47,7 @@ export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
 
 	public deleteAll() {
 
+	public has(value: T): boolean {
+		return super.has(this.coerceValue?.(value) ?? value);
 	}
 }

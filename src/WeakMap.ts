@@ -1,16 +1,17 @@
-import { EmplaceHandler } from './types'
+import { EmplaceHandler, CoercionHandler } from './types';
 
 export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
-	public constructor(iterable: Iterable<[K, V]>)
-	public constructor(entries?: ReadonlyArray<[object, any]>)
-	public constructor(entries?: Iterable<[K, V]> | ReadonlyArray<[K, V]>) {
-		super(entries)
-	}
+	private readonly coerceKey: (key?: K) => K;
+	private readonly coerceValue: (value?: V) => V;
 
-	public static of(...args: [any, any][]): ExtendedWeakMap<any, any>
-    public static of<K extends object, V>(...args: [K, V][]): ExtendedWeakMap<K, V>
-    public static of<K extends object, V>(...args: [K, V][]): ExtendedWeakMap<K, V> {
-        return new ExtendedWeakMap<K, V>(args)
+	public constructor(iterable: Iterable<[K, V]>);
+	public constructor(entries?: ReadonlyArray<[object, any]>);
+	public constructor(entries: ReadonlyArray<[K, V]> | Iterable<[K, V]>, handler: CoercionHandler<K, V>);
+	public constructor(entries?: ReadonlyArray<[K, V]> | Iterable<[K, V]>, handler?: CoercionHandler<K, V>) {
+		super(entries);
+
+		this.coerceKey = handler?.coerceKey;
+		this.coerceValue = handler?.coerceValue;
 	}
 	
 	public static from<T, K extends object = object, V = any>(iterable: Iterable<T>): ExtendedWeakMap<K, V>
@@ -49,16 +50,33 @@ export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
     }
 
 	public emplace(key: K, handler: EmplaceHandler<K, V>): V {
-        if (!('update' in handler) && !('insert' in handler)) {
-            throw new ReferenceError('At least one handler function must be provided')
-        }
+		if (!('update' in handler) && !('insert' in handler)) {
+			throw new ReferenceError('At least one callback must be provided');
+		}
 
-        const value = (this.has(key) && 'update' in handler)
-            ? handler.update(this.get(key), key, this as any)
-            : handler.insert(key, this as any)
+		const value =
+			this.has(key) && 'update' in handler
+				? handler.update(this.get(key), this.coerceKey?.(key) ?? key, this as any)
+				: handler.insert(this.coerceKey?.(key) ?? key, this as any);
 
-        this.set(key, value)
+		this.set(key, value);
 
-        return value
-    }
+		return value;
+	}
+
+	public get(key: K): V {
+		return super.get(this.coerceKey?.(key) ?? key);
+	}
+
+	public has(key: K): boolean {
+		return super.has(this.coerceKey?.(key) ?? key);
+	}
+
+	public set(key: K, value: V): this {
+		// prettier-ignore
+		return super.set(
+			this.coerceKey?.(key) ?? key,
+			this.coerceValue?.(value) ?? value
+		);
+	}
 }
