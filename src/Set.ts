@@ -54,6 +54,20 @@ export class ExtendedSet<T> extends Set<T> {
 		return super.add(this.coerceValue?.(value) ?? value);
 	}
 
+	public at(index: number): T | undefined {
+		index = Math.trunc(index) ?? 0;
+
+		if (index < 0) {
+			index += this.size;
+		}
+
+		if (index < 0 || index >= this.size) {
+			return undefined;
+		}
+
+		return Array.from(this)[index];
+	}
+
 	public addAll(...values: T[]): ExtendedSet<T> {
 		for (const value of values) {
 			this.add(value);
