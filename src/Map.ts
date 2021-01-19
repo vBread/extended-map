@@ -84,6 +84,22 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return new ExtendedMap<K, V>(args);
 	}
 
+	public get first(): V | undefined {
+		return this.values().next().value;
+	}
+
+	public get firstKey(): K | undefined {
+		return this.keys().next().value;
+	}
+
+	public get last(): V | undefined {
+		return this.at(-1)[1];
+	}
+
+	public get lastKey(): K | undefined {
+		return this.at(-1)[0];
+	}
+
 	public at(index: number): [K, V] | undefined {
 		index = Math.trunc(index) ?? 0;
 
@@ -191,14 +207,6 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return undefined;
 	}
 
-	public first(): V | undefined {
-		return this.values().next().value;
-	}
-
-	public firstKey(): K | undefined {
-		return this.keys().next().value;
-	}
-
 	public get(key: K): V {
 		return super.get(this.coerceKey?.(key) ?? key);
 	}
@@ -225,14 +233,6 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		}
 
 		return undefined;
-	}
-
-	public last(): V | undefined {
-		return this.at(-1)[1];
-	}
-
-	public lastKey(): K | undefined {
-		return this.at(-1)[0];
 	}
 
 	public map(callbackfn: (value: V, key: K, map: ExtendedMap<K, V>) => any): ExtendedMap<K, V>;
