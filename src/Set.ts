@@ -1,3 +1,5 @@
+import { inspect } from './util/constants';
+
 export class ExtendedSet<T> extends Set<T> {
 	private readonly coerceValue: (value: T) => T;
 
@@ -8,6 +10,10 @@ export class ExtendedSet<T> extends Set<T> {
 		super(entries);
 
 		this.coerceValue = coerceValue;
+	}
+
+	private [inspect]() {
+		return new Set(this);
 	}
 
 	public static from<U, T = any>(iterable: Iterable<U>): ExtendedSet<T>;
@@ -65,15 +71,22 @@ export class ExtendedSet<T> extends Set<T> {
 			return undefined;
 		}
 
-		return Array.from(this)[index];
+		return this.toArray()[index];
 	}
 
-	public addAll(...values: T[]): ExtendedSet<T> {
+	public addAll(...values: T[]): this {
 		for (const value of values) {
 			this.add(value);
 		}
 
 		return this;
+	}
+
+	public copyTo(target: T[]): T[];
+	public copyTo(target: T[], start: number): T[];
+	public copyTo(target: T[], start: number, count: number): T[];
+	public copyTo(target: any[], start?: number, count?: number): T[] {
+		return target.splice(start ?? target.length, 0, ...this.toArray().slice(0, count ?? this.size));
 	}
 
 	public delete(value: T): boolean {
@@ -93,7 +106,7 @@ export class ExtendedSet<T> extends Set<T> {
 	public difference(iterable: Iterable<T>): ExtendedSet<T>;
 	public difference<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public difference(iterable: Iterable<any>): ExtendedSet<T> {
-		const set = new ExtendedSet<T>([...this]);
+		const set = new ExtendedSet<T>(this);
 
 		for (const item of iterable) {
 			set.delete(item);
@@ -102,9 +115,9 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public every(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean): boolean;
-	public every<T>(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: T): boolean;
-	public every(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: any = this): boolean {
+	public every(predicate: (value: T, key: T, set: this) => boolean): boolean;
+	public every<T>(predicate: (value: T, key: T, set: this) => boolean, thisArg: T): boolean;
+	public every(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): boolean {
 		for (const value of this) {
 			if (!predicate.call(thisArg, value, value, this)) {
 				return false;
@@ -128,9 +141,9 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public filterOut(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean): ExtendedSet<T>;
-	public filterOut<U>(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: U): ExtendedSet<T>;
-	public filterOut(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: any = this): ExtendedSet<T> {
+	public filterOut(predicate: (value: T, key: T, set: this) => boolean): ExtendedSet<T>;
+	public filterOut<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): ExtendedSet<T>;
+	public filterOut(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): ExtendedSet<T> {
 		const set = new ExtendedSet<T>();
 
 		for (const value of this) {
@@ -142,9 +155,9 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public find(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean): T | undefined;
-	public find<U>(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: U): T | undefined;
-	public find(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: any = this): T | undefined {
+	public find(predicate: (value: T, key: T, set: this) => boolean): T | undefined;
+	public find<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): T | undefined;
+	public find(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): T | undefined {
 		for (const value of this) {
 			if (predicate.call(thisArg, value, value, this)) {
 				return value;
@@ -161,7 +174,7 @@ export class ExtendedSet<T> extends Set<T> {
 	public intersection(iterable: Iterable<T>): ExtendedSet<T>;
 	public intersection<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public intersection(iterable: Iterable<any>): ExtendedSet<T> {
-		const set = new ExtendedSet<T>([...this]);
+		const set = new ExtendedSet<T>(this);
 
 		for (const item of iterable) {
 			if (this.has(item)) {
@@ -214,11 +227,11 @@ export class ExtendedSet<T> extends Set<T> {
 		return this.toArray().join(separator);
 	}
 
-	public map(callbackfn: (value: T, key: T, set: ExtendedSet<T>) => any): ExtendedSet<T>;
-	public map<T>(callbackfn: (value: T, key: T, set: ExtendedSet<T>) => T): ExtendedSet<T>;
-	public map<U>(callbackfn: (value: T, key: T, set: ExtendedSet<T>) => any, thisArg: U): ExtendedSet<T>;
-	public map<T, U>(callbackfn: (value: T, key: T, set: ExtendedSet<T>) => T, thisArg: U): ExtendedSet<T>;
-	public map(callbackfn: (value: T, key: T, set: ExtendedSet<T>) => any, thisArg: any = this): ExtendedSet<T> {
+	public map(callbackfn: (value: T, key: T, set: this) => any): ExtendedSet<T>;
+	public map<T>(callbackfn: (value: T, key: T, set: this) => T): ExtendedSet<T>;
+	public map<U>(callbackfn: (value: T, key: T, set: this) => any, thisArg: U): ExtendedSet<T>;
+	public map<T, U>(callbackfn: (value: T, key: T, set: this) => T, thisArg: U): ExtendedSet<T>;
+	public map(callbackfn: (value: T, key: T, set: this) => any, thisArg: any = this): ExtendedSet<T> {
 		const set = new ExtendedSet<T>();
 
 		for (const value of this) {
@@ -228,9 +241,25 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: ExtendedSet<T>) => U): U;
-	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: ExtendedSet<T>) => U, initialValue: U): U;
-	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: ExtendedSet<T>) => U, initialValue?: U): U {
+	public partition(predicate: (value: T, key: T, set: this) => boolean): [ExtendedSet<T>, ExtendedSet<T>];
+	public partition<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): [ExtendedSet<T>, ExtendedSet<T>];
+	public partition(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): [ExtendedSet<T>, ExtendedSet<T>] {
+		const [passed, failed] = [new ExtendedSet<T>(), new ExtendedSet<T>()];
+
+		for (const value of this) {
+			if (predicate.call(thisArg, value, value, this)) {
+				passed.add(value);
+			} else {
+				failed.add(value);
+			}
+		}
+
+		return [passed, failed];
+	}
+
+	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: this) => U): U;
+	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: this) => U, initialValue: U): U;
+	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: this) => U, initialValue?: U): U {
 		let initial: boolean = !!initialValue;
 		let accumulator = initial ? initialValue : undefined;
 
@@ -246,9 +275,9 @@ export class ExtendedSet<T> extends Set<T> {
 		return accumulator;
 	}
 
-	public some(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean): boolean;
-	public some<T>(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: T): boolean;
-	public some(predicate: (value: T, key: T, set: ExtendedSet<T>) => boolean, thisArg: any = this): boolean {
+	public some(predicate: (value: T, key: T, set: this) => boolean): boolean;
+	public some<T>(predicate: (value: T, key: T, set: this) => boolean, thisArg: T): boolean;
+	public some(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): boolean {
 		for (const value of this) {
 			if (predicate.call(thisArg, value, value, this)) {
 				return true;
@@ -261,7 +290,7 @@ export class ExtendedSet<T> extends Set<T> {
 	public symmetricDifference(iterable: Iterable<T>): ExtendedSet<T>;
 	public symmetricDifference<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public symmetricDifference(iterable: Iterable<any>): ExtendedSet<T> {
-		const set = new ExtendedSet<T>([...this]);
+		const set = new ExtendedSet<T>(this);
 
 		for (const item of iterable) {
 			set.delete(item) || set.add(item);

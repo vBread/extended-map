@@ -1,6 +1,6 @@
-export * from './types'
+export * from './types';
 
-export * from './Map'
-export * from './Set'
-export * from './WeakMap'
-export * from './WeakSet'
+export * from './Map';
+export * from './Set';
+export * from './WeakMap';
+export * from './WeakSet';

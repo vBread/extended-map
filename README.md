@@ -14,7 +14,14 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - `Map.isMap`
 - [`Map.keyBy`](https://tc39.es/proposal-collection-methods/#Map.keyBy)
 - [`Map.of`](https://tc39.es/proposal-setmap-offrom/#sec-map.of)
-  
+
+## Properties
+
+- `Map.prototype.first`
+- `Map.prototype.firstKey`
+- `Map.prototype.last`
+- `Map.prototype.lastKey`
+
 ## Instance
 
 - [`Map.prototype.at`](https://tc39.es/proposal-relative-indexing-method/)††
@@ -25,15 +32,12 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Map.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)††
 - [`Map.prototype.findKey`](https://tc39.es/proposal-collection-methods/#Map.prototype.findKey)
 - [`Map.prototype.find`](https://tc39.es/proposal-collection-methods/#Map.prototype.find)
-- `Map.prototype.first`
-- `Map.prototype.firstKey`
 - [`Map.prototype.includes`](https://tc39.es/proposal-collection-methods/#Map.prototype.includes)
 - [`Map.prototype.keyOf`](https://tc39.es/proposal-collection-methods/#Map.prototype.keyOf)
-- `Map.prototype.last`
-- `Map.prototype.lastKey`
 - [`Map.prototype.mapKeys`](https://tc39.es/proposal-collection-methods/#Map.prototype.mapKeys)
 - [`Map.prototype.mapValues`](https://tc39.es/proposal-collection-methods/#Map.prototype.mapValues)†
 - [`Map.prototype.merge`](https://tc39.es/proposal-collection-methods/#Map.prototype.merge)
+- [`Map.prototype.partition`]
 - `Map.prototype.random`
 - `Map.prototype.randomKey`
 - [`Map.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Map.prototype.reduce)
@@ -67,12 +71,13 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 ## Instance
 
 - [`Set.prototype.addAll`](https://tc39.es/proposal-collection-methods/#Set.prototype.addAll)
-- [`Set.prototype.deleteAll`](https://tc39.es/proposal-collection-methods/#Set.prototype.deleteAll)
+- [`Set.prototype.at`](https://tc39.es/proposal-relative-indexing-method/)\*
+- [`Set.prototype.copyTo`](https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.hashset-1.copyto?view=net-5.0)
 - [`Set.prototype.deleteAll`](https://tc39.es/proposal-collection-methods/#Set.prototype.deleteAll)
 - [`Set.prototype.difference`](https://tc39.es/proposal-set-methods/#Set.prototype.difference)
 - [`Set.prototype.every`](https://tc39.es/proposal-collection-methods/#Set.prototype.every)
 - [`Set.prototype.filter`](https://tc39.es/proposal-collection-methods/#Set.prototype.filter)
-- [`Set.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)
+- [`Set.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)\*
 - [`Set.prototype.find`](https://tc39.es/proposal-collection-methods/#Set.prototype.find)
 - [`Set.prototype.intersection`](https://tc39.es/proposal-set-methods/#Set.prototype.intersection)
 - [`Set.prototype.isDisjointFrom`](https://tc39.es/proposal-set-methods/#Set.prototype.isDisjointFrom)
@@ -80,16 +85,18 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Set.prototype.isSupersetOf`](https://tc39.es/proposal-set-methods/#Set.prototype.isSupersetOf)
 - [`Set.prototype.join`](https://tc39.es/proposal-collection-methods/#Set.prototype.join)
 - [`Set.prototype.map`](https://tc39.es/proposal-collection-methods/#Set.prototype.map)
+- [`Set.prototype.partition`]
 - [`Set.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Set.prototype.reduce)
 - [`Set.prototype.some`](https://tc39.es/proposal-collection-methods/#Set.prototype.some)
 - [`Set.prototype.symmetricDifference`](https://tc39.es/proposal-set-methods/#Set.prototype.symmetricDifference)
 - `Set.prototype.toArray`
 - [`Set.prototype.union`](https://tc39.es/proposal-set-methods/#Set.prototype.union)
 
+\* Adapted to work with Set
+
 <!-- markdownlint-disable-next-line -->
 ## Planned
 
-- `Set.prototype.at`
 - `Set.prototype.first`
 - `Set.prototype.flat`
 - `Set.prototype.last`
