@@ -1,5 +1,11 @@
-import { EmplaceHandler, CoercionHandler } from './types';
+import { CoercionHandler, EmplaceHandler } from './types';
 
+/**
+ * Collection of key/value pairs in which the keys are weakly referenced.
+ * The keys must be objects and the values can be arbitrary values
+ *
+ * @spec {@link https://tc39.es/ecma262/#sec-weakmap-objects ECMA-262}
+ */
 export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
 	private readonly coerceKey: (key?: K) => K;
 	private readonly coerceValue: (value?: V) => V;
@@ -55,6 +61,16 @@ export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
 		return new ExtendedWeakMap<K, V>(args);
 	}
 
+	/**
+	 * Removes the specified element from the `WeakMap`
+	 *
+	 * @param key The key of the element to remove from the `WeakMap`
+	 * @returns
+	 * `true` if an element in the `WeakMap` has been removed successfully
+	 * `false` if the key is not found in the `WeakMap` or if the key is not an object
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-weakmap.prototype.delete ECMA-262}
+	 */
 	public delete(key: K): boolean {
 		return super.delete(this.coerceKey?.(key) ?? key);
 	}
@@ -84,14 +100,39 @@ export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
 		return value;
 	}
 
-	public get(key: K): V {
+	/**
+	 * Returns a specified element from the `WeakMap`
+	 *
+	 * @param key The key of the element to return from the `WeakMap`
+	 * @returns The element associated with the specified key in the `WeakMap`. If the key can't be found, `undefined` is returned
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-weakmap.prototype.get ECMA-262}
+	 */
+	public get(key: K): V | undefined {
 		return super.get(this.coerceKey?.(key) ?? key);
 	}
 
+	/**
+	 * Returns a boolean indicating whether an element with the specified key exists in the `WeakMap` or not
+	 *
+	 * @param key The key of the element to test for presence in the `WeakMap`
+	 * @returns `true` if an element with the specified key exists in the `WeakMap`; otherwise `false`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-weakmap.prototype.has ECMA-262}
+	 */
 	public has(key: K): boolean {
 		return super.has(this.coerceKey?.(key) ?? key);
 	}
 
+	/**
+	 * Adds a new element with a specified key and value to the `WeakMap`
+	 *
+	 * @param key The key of the element to add to the `WeakMap`
+	 * @param value The value of the element to add to the `WeakMap`
+	 * @returns The `WeakMap`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-weakmap.prototype.set ECMA-262}
+	 */
 	public set(key: K, value: V): this {
 		// prettier-ignore
 		return super.set(

@@ -1,7 +1,20 @@
 import { inspect } from './util/constants';
 
+/**
+ * Stores unique values of any type, whether primitive values or object references
+ *
+ * @spec {@link https://tc39.es/ecma262/#sec-set-constructor ECMA-262}
+ */
 export class ExtendedSet<T> extends Set<T> {
 	private readonly coerceValue: (value: T) => T;
+
+	/**
+	 * The number of (unique) elements in the `Set`
+	 * @readonly
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-get-set.prototype.size ECMA-262}
+	 */
+	public readonly size: number;
 
 	public constructor(iterable?: Iterable<T>);
 	public constructor(values?: ReadonlyArray<T>);
@@ -56,6 +69,14 @@ export class ExtendedSet<T> extends Set<T> {
 		return new ExtendedSet<T>(args);
 	}
 
+	/**
+	 * Appends a new element with a specified value to the end of the `Set`
+	 *
+	 * @param value The value of the element to add to the `Set`
+	 * @returns The `Set` with the added value
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.add ECMA-262}
+	 */
 	public add(value: T): this {
 		return super.add(this.coerceValue?.(value) ?? value);
 	}
@@ -82,6 +103,15 @@ export class ExtendedSet<T> extends Set<T> {
 		return this;
 	}
 
+	/**
+	 * Removes all elements from the `Set`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.clear ECMA-262}
+	 */
+	public clear(): void {
+		return super.clear();
+	}
+
 	public copyTo(target: T[]): T[];
 	public copyTo(target: T[], start: number): T[];
 	public copyTo(target: T[], start: number, count: number): T[];
@@ -89,6 +119,14 @@ export class ExtendedSet<T> extends Set<T> {
 		return target.splice(start ?? target.length, 0, ...this.toArray().slice(0, count ?? this.size));
 	}
 
+	/**
+	 * Removes a specified value from the `Set`, if it is in the set
+	 *
+	 * @param value The value to remove from the `Set`
+	 * @returns `true` if `value` was already in the `Set`; otherwise `false`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.delete ECMA-262}
+	 */
 	public delete(value: T): boolean {
 		return super.delete(this.coerceValue?.(value) ?? value);
 	}
@@ -167,6 +205,32 @@ export class ExtendedSet<T> extends Set<T> {
 		return undefined;
 	}
 
+	/**
+	 * Executes a provided function once for each value in the `Set`, in insertion order
+	 *
+	 * @param callbackfn Function to execute for each element, taking three arguments
+	 * 		  - `value`, `key`: The current element being processed in the `Set`.
+	 * 			 As there are no keys in `Set`, the value is passed for both arguments
+	 * 		  - `set`: The `Set` which `forEach()` was called upon
+	 * @param thisArg Value to use as `this` when executing `callback`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.foreach ECMA-262}
+	 */
+	public forEach<U = any>(callbackfn: (value: T, key: T, set: this) => U): void;
+	public forEach<U>(callbackfn: (value: T, key: T, set: this) => any, thisArg: U): void;
+	public forEach<R, U>(callbackfn: (value: T, key: T, set: this) => R, thisArg: U): void;
+	public forEach(callbackfn: (value: T, key: T, set: this) => any, thisArg: any = this): void {
+		return super.forEach(callbackfn, thisArg);
+	}
+
+	/**
+	 * Returns a boolean indicating whether an element with the specified value exists in the `Set` or not
+	 *
+	 * @param value The value to test for presence in the `Set`
+	 * @returns `true` if an element with the specified value exists in the `Set`; otherwise `false`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.has ECMA-262}
+	 */
 	public has(value: T): boolean {
 		return super.has(this.coerceValue?.(value) ?? value);
 	}

@@ -1,12 +1,19 @@
 import { CoercionHandler, EmplaceHandler } from './types';
 import { inspect } from './util/constants';
 
+/**
+ * Holds key-value pairs and remembers the original insertion order of the keys.
+ * Any value (both objects and primitive values) may be used as either a key or a value
+ */
 export class ExtendedMap<K, V> extends Map<K, V> {
 	private readonly coerceKey: (key?: K) => K;
 	private readonly coerceValue: (value?: V) => V;
 
 	/**
-	 * The number of elements in the Map
+	 * The number of elements in the `Map`
+	 * @readonly
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-get-map.prototype.size ECMA-262}
 	 */
 	public readonly size: number;
 
@@ -124,6 +131,23 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return [...this][index];
 	}
 
+	/**
+	 * Removes all elements from the `Map`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.clear ECMA-262}
+	 */
+	public clear(): void {
+		return super.clear();
+	}
+
+	/**
+	 * Removes the specified element from the `Map` by key
+	 *
+	 * @param key The key of the element to remove from the `Map`
+	 * @returns `true` if an element in the `Map` existed and has been removed, or `false` if the element does not exist
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.delete ECMA-262}
+	 */
 	public delete(key: K): boolean {
 		return super.delete(this.coerceKey?.(key) ?? key);
 	}
@@ -217,10 +241,45 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return undefined;
 	}
 
+	/**
+	 * Executes a provided function once per each key/value in the `Set`, in insertion order
+	 *
+	 * @param callbackfn Function to execute for each entry of the `Map`. It takes the following arguments
+	 * 		  - `value`: Value of each iteration
+	 * 		  - `key`: Key of each iteration
+	 * 		  - `map`: The map being iterated
+	 * @param thisArg Value to use as `this` when executing `callback`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.foreach ECMA-262}
+	 */
+	public forEach<U = any>(callbackfn: (value: V, key: K, set: this) => U): void;
+	public forEach<U>(callbackfn: (value: V, key: K, set: this) => any, thisArg: U): void;
+	public forEach<R, U>(callbackfn: (value: V, key: K, set: this) => R, thisArg: U): void;
+	public forEach(callbackfn: (value: V, key: K, set: this) => any, thisArg: any = this): void {
+		return super.forEach(callbackfn, thisArg);
+	}
+
+	/**
+	 * Returns a specified element from the `Map`. If the value that is associated to the provided key is an object, then
+	 * you will get a reference to that object and any change made to that object will effectively modify it inside the `Map`
+	 *
+	 * @param key The key of the element to return from the `Map`
+	 * @returns The element associated with the specified key, or undefined if the key can't be found in the `Map`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.get ECMA-262}
+	 */
 	public get(key: K): V {
 		return super.get(this.coerceKey?.(key) ?? key);
 	}
 
+	/**
+	 * Returns a boolean indicating whether an element with the specified key exists or not
+	 *
+	 * @param key The key of the element to test for presence in the `Map`
+	 * @returns `true` if an element with the specified key exists in the `Map`; otherwise `false`
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.has ECMA-262}
+	 */
 	public has(key: K): boolean {
 		return super.has(this.coerceKey?.(key) ?? key);
 	}
@@ -354,6 +413,13 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return accumulator;
 	}
 
+	/**
+	 * Adds or updates an element with a specified key and a value to the `Map`
+	 *
+	 * @param key The key of the element to add to the `Map`
+	 * @param value The value of the element to add to the `Map`
+	 * @returns The `Map`
+	 */
 	public set(key: K, value: V): this {
 		return super.set(this.coerceKey?.(key) ?? key, this.coerceValue?.(value) ?? value);
 	}
