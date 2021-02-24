@@ -15,13 +15,6 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Map.keyBy`](https://tc39.es/proposal-collection-methods/#Map.keyBy)
 - [`Map.of`](https://tc39.es/proposal-setmap-offrom/#sec-map.of)
 
-## Properties
-
-- `Map.prototype.first`
-- `Map.prototype.firstKey`
-- `Map.prototype.last`
-- `Map.prototype.lastKey`
-
 ## Instance
 
 - [`Map.prototype.at`](https://tc39.es/proposal-relative-indexing-method/)††
