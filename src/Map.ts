@@ -290,10 +290,9 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	 *
 	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.foreach ECMA-262}
 	 */
-	public forEach<U = any>(callbackfn: (value: V, key: K, set: this) => U): void;
-	public forEach<U>(callbackfn: (value: V, key: K, set: this) => any, thisArg: U): void;
-	public forEach<R, U>(callbackfn: (value: V, key: K, set: this) => R, thisArg: U): void;
-	public forEach(callbackfn: (value: V, key: K, set: this) => any, thisArg: any = this): void {
+	public forEach(callbackfn: (value: V, key: K, map: this) => void): void;
+	public forEach<U>(callbackfn: (value: V, key: K, map: this) => void, thisArg: U): void;
+	public forEach(callbackfn: (value: V, key: K, map: this) => void, thisArg: any = this): void {
 		return super.forEach(callbackfn, thisArg);
 	}
 
