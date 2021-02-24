@@ -1,1 +1,1 @@
-export const inspect = Symbol.for('nodejs.util.inspect.custom');
+export const inspect: unique symbol = Symbol.for('nodejs.util.inspect.custom');
