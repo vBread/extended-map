@@ -35,18 +35,16 @@ export class ExtendedWeakSet<T extends object> extends WeakSet<T> {
         return new ExtendedWeakSet<T>(entries)
     }
 
-	public static isWeakSet(arg: any): arg is ExtendedWeakSet<any>;
-	public static isWeakSet<T extends object>(arg: any): arg is ExtendedWeakSet<T>;
-	public static isWeakSet(arg: any): arg is ExtendedWeakSet<any> {
-		const methods = ['add', 'has', 'delete'];
-
-		// prettier-ignore
-		return (
-			arg
-			&& !('size' in arg)
-			&& arg[Symbol.toStringTag] === 'WeakSet'
-			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
-		)
+	/**
+	 * Determines whether the passed value is a `WeakSet`.
+	 *
+	 * @param arg The value to be checked.
+	 * @returns `true` if the value is a `WeakSet`; otherwise `false`.
+	 */
+	public static isWeakSet(arg: any): arg is WeakSet<any>;
+	public static isWeakSet<T extends object>(arg: any): arg is WeakSet<T>;
+	public static isWeakSet(arg: any): arg is WeakSet<any> {
+		return arg[Symbol.toStringTag] === 'WeakSet' && arg.toString() === '[object WeakSet]';
 	}
 
 	public static of(...args: any[]): ExtendedWeakSet<any>;

@@ -1,27 +1,42 @@
-import { CoercionHandler, EmplaceHandler } from './types';
 import { inspect } from './util/constants';
+import { CoercionHandler, EmplaceHandler, IterableEntries } from './util/types';
 
 /**
  * Holds key-value pairs and remembers the original insertion order of the keys.
- * Any value (both objects and primitive values) may be used as either a key or a value
+ * Any value (both objects and primitive values) may be used as either a key or a value.
+ *
+ * @spec {@link https://tc39.es/ecma262/#sec-map-objects ECMA-262}
  */
 export class ExtendedMap<K, V> extends Map<K, V> {
 	private readonly coerceKey: (key?: K) => K;
 	private readonly coerceValue: (value?: V) => V;
 
 	/**
-	 * The number of elements in the `Map`
+	 * The number of elements in the `Map`.
 	 * @readonly
 	 *
 	 * @spec {@link https://tc39.es/ecma262/#sec-get-map.prototype.size ECMA-262}
 	 */
 	public readonly size: number;
 
-	public constructor(iterable: Iterable<readonly [K, V]>);
-	public constructor(entries?: ReadonlyArray<readonly [K, V]>);
-	public constructor(entries: ReadonlyArray<readonly [K, V]>, handler: CoercionHandler<K, V>);
-	public constructor(entries?: ReadonlyArray<readonly [K, V]> | Iterable<readonly [K, V]>, handler?: CoercionHandler<K, V>) {
-		super(entries);
+	/**
+	 * @param entries An Array or other iterable object whose elements are key-value pairs.
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-map-iterable ECMA-262}
+	 */
+	public constructor(iterable?: IterableEntries<K, V>);
+
+	/**
+	 * @param entries An Array or other iterable object whose elements are key-value pairs.
+	 * @param handler An object that defines hooks to normalize the values in the `Map`.
+	 * Normalization is applied when data is incoming to find the identity of the
+	 * key location in `[[MapData]]` and when placing the value in `[[MapData]]`.
+	 *
+	 * @spec {@link https://tc39.es/proposal-collection-normalization/#sec-map-iterable Stage 2 ECMAScript Proposal}
+	 */
+	public constructor(iterable: IterableEntries<K, V>, handler: CoercionHandler<K, V>);
+	public constructor(iterable?: IterableEntries<K, V>, handler?: CoercionHandler<K, V>) {
+		super(iterable);
 
 		this.coerceKey = handler?.coerceKey;
 		this.coerceValue = handler?.coerceValue;
@@ -31,10 +46,39 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return new Map(this);
 	}
 
+	/**
+	 * Creates a new, shallow-copied `Map` instance from a map-like or iterable object.
+	 *
+	 * @param iterable A map-like or iterable object to convert to a `Map`.
+	 * @returns A new `Map` instance.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-map.from Stage 1 ECMAScript Proposal}
+	 */
 	public static from<T, K = any, V = any>(iterable: Iterable<T>): ExtendedMap<K, V>;
+
+	/**
+	 * Creates a new, shallow-copied `Map` instance from a map-like or iterable object.
+	 *
+	 * @param iterable A map-like or iterable object to convert to a map.
+	 * @param mapfn Map function to call on each key-value pair of the map.
+	 * @returns A new `Map` instance.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-map.from Stage 1 ECMAScript Proposal}
+	 */
 	public static from<T, K = any, V = any>(iterable: Iterable<T>, mapfn: (value: T, index: number) => [K, V]): ExtendedMap<K, V>;
 	public static from<K = any, V = any>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => [K, V]): ExtendedMap<K, V>;
-	public static from<U, T, K = any, V = any>(iterable: Iterable<T>, mapfn: (value: T, index: number) => [K, V], thisArg: U): ExtendedMap<K, V>;
+
+	/**
+	 * Creates a new, shallow-copied `Map` instance from a map-like or iterable object.
+	 *
+	 * @param iterable A map-like or iterable object to convert to a map.
+	 * @param mapfn Map function to call on each key-value pair of the map.
+	 * @param thisArg Value to use as `this` when executing `mapfn`.
+	 * @returns A new `Map` instance.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-map.from Stage 1 ECMAScript Proposal}
+	 */
+	public static from<T, U, K = any, V = any>(iterable: Iterable<T>, mapfn: (value: T, index: number) => [K, V], thisArg: U): ExtendedMap<K, V>;
 	public static from<K = any, V = any>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => [K, V], thisArg: any = this): ExtendedMap<K, V> {
 		const entries: [K, V][] = [];
 		let i = 0;
@@ -59,27 +103,23 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 				update: (value) => {
 					value.push(item);
 					return value;
-				},
+				}
 			});
 		}
 
 		return map;
 	}
 
+	/**
+	 * Determines whether the passed value is a `Map`.
+	 *
+	 * @param arg The value to be checked.
+	 * @returns `true` if the value is a `Map`; otherwise `false`.
+	 */
 	public static isMap(arg: any): arg is Map<any, any>;
 	public static isMap<K, V>(arg: any): arg is Map<K, V>;
 	public static isMap(arg: any): arg is Map<any, any> {
-		const methods = ['has', 'get', 'set', 'entries', 'delete', 'values', 'keys', 'forEach', 'clear'];
-
-		// prettier-ignore
-		return (
-			arg
-			&& typeof arg === 'object'
-			&& 'size' in arg
-			&& typeof arg.size === 'number'
-			&& arg[Symbol.toStringTag] === 'Map'
-			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
-		);
+		return arg[Symbol.toStringTag] === 'Map' && arg.toString() === '[object Map]';
 	}
 
 	public static keyBy(iterable: Iterable<any>): ExtendedMap<any, any[]>;
@@ -95,6 +135,14 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return map;
 	}
 
+	/**
+	 * Creates a new `Map` instance from a variable number of arguments, regardless of number or type of the arguments.
+	 *
+	 * @param args Key-value pairs used to create the map.
+	 * @returns A new `Map` instance.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-map.of Stage 1 ECMAScript Proposal}
+	 */
 	public static of(...args: [any, any][]): ExtendedMap<any, any>;
 	public static of<K, V>(...args: [K, V][]): ExtendedMap<K, V>;
 	public static of<K, V>(...args: [K, V][]): ExtendedMap<K, V> {
@@ -141,10 +189,10 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	}
 
 	/**
-	 * Removes the specified element from the `Map` by key
+	 * Removes the specified element from the `Map` by key.
 	 *
-	 * @param key The key of the element to remove from the `Map`
-	 * @returns `true` if an element in the `Map` existed and has been removed, or `false` if the element does not exist
+	 * @param key The key of the element to remove from the `Map`.
+	 * @returns `true` if an element in the `Map` existed and has been removed, or `false` if the element does not exist.
 	 *
 	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.delete ECMA-262}
 	 */
@@ -162,13 +210,19 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return !!finished;
 	}
 
+	/**
+	 * Adds a value to the `Map` if the it does not already have something at `key`, and will also update an existing value at `key`.
+	 *
+	 * @param key The key of the element to add or update to the `Map`
+	 * @param handler
+	 */
 	public emplace(key: K, handler: EmplaceHandler<K, V>): V {
-		if (!('update' in handler) && !('insert' in handler)) {
+		if (!Reflect.has(handler, 'update') && !Reflect.has(handler, 'insert')) {
 			throw new ReferenceError('At least one callback must be provided');
 		}
 
 		const value =
-			this.has(key) && 'update' in handler
+			this.has(key) && Reflect.has(handler, 'update')
 				? handler.update(this.get(key), this.coerceKey?.(key) ?? key, this as any)
 				: handler.insert(this.coerceKey?.(key) ?? key, this as any);
 
@@ -242,13 +296,13 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	}
 
 	/**
-	 * Executes a provided function once per each key/value in the `Set`, in insertion order
+	 * Executes a provided function once per each key/value in the `Map`, in insertion order.
 	 *
-	 * @param callbackfn Function to execute for each entry of the `Map`. It takes the following arguments
+	 * @param callbackfn Function to execute for each entry of the `Map`. It takes the following arguments:
 	 * 		  - `value`: Value of each iteration
 	 * 		  - `key`: Key of each iteration
 	 * 		  - `map`: The map being iterated
-	 * @param thisArg Value to use as `this` when executing `callback`
+	 * @param thisArg Value to use as `this` when executing `callback`.
 	 *
 	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.foreach ECMA-262}
 	 */
@@ -261,10 +315,10 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 
 	/**
 	 * Returns a specified element from the `Map`. If the value that is associated to the provided key is an object, then
-	 * you will get a reference to that object and any change made to that object will effectively modify it inside the `Map`
+	 * you will get a reference to that object and any change made to that object will effectively modify it inside the `Map`.
 	 *
-	 * @param key The key of the element to return from the `Map`
-	 * @returns The element associated with the specified key, or undefined if the key can't be found in the `Map`
+	 * @param key The key of the element to return from the `Map`.
+	 * @returns The element associated with the specified key, or undefined if the key can't be found in the `Map`.
 	 *
 	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.get ECMA-262}
 	 */
@@ -273,10 +327,10 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	}
 
 	/**
-	 * Returns a boolean indicating whether an element with the specified key exists or not
+	 * Returns a boolean indicating whether an element with the specified key exists or not.
 	 *
-	 * @param key The key of the element to test for presence in the `Map`
-	 * @returns `true` if an element with the specified key exists in the `Map`; otherwise `false`
+	 * @param key The key of the element to test for presence in the `Map`.
+	 * @returns `true` if an element with the specified key exists in the `Map`; otherwise `false`.
 	 *
 	 * @spec {@link https://tc39.es/ecma262/#sec-map.prototype.has ECMA-262}
 	 */
@@ -364,7 +418,7 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	public random(): V;
 	public random(amount: number): V[];
 	public random(amount: number = 1): V | V[] {
-		const entries = this.toArray();
+		const entries = [...this.values()];
 		const results: V[] = [];
 
 		for (let i = 0; i < amount; i++) {
@@ -381,7 +435,7 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	public randomKey(): K;
 	public randomKey(amount: number): K[];
 	public randomKey(amount: number = 1): K | K[] {
-		const entries = this.toKeyArray();
+		const entries = [...this.keys()];
 		const results: K[] = [];
 
 		for (let i = 0; i < amount; i++) {
@@ -414,11 +468,11 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	}
 
 	/**
-	 * Adds or updates an element with a specified key and a value to the `Map`
+	 * Adds or updates an element with a specified key and a value to the `Map`.
 	 *
-	 * @param key The key of the element to add to the `Map`
-	 * @param value The value of the element to add to the `Map`
-	 * @returns The `Map`
+	 * @param key The key of the element to add to the `Map`.
+	 * @param value The value of the element to add to the `Map`.
+	 * @returns The `Map`.
 	 */
 	public set(key: K, value: V): this {
 		return super.set(this.coerceKey?.(key) ?? key, this.coerceValue?.(value) ?? value);
@@ -451,14 +505,6 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 		return this;
 	}
 
-	public toArray(): V[] {
-		return [...this.values()];
-	}
-
-	public toKeyArray(): K[] {
-		return [...this.keys()];
-	}
-
 	public uniqueBy(): ExtendedMap<K, V>;
 	public uniqueBy(valueResolver: string | number): ExtendedMap<K, V>;
 	public uniqueBy(valueResolver: (value: V) => any): ExtendedMap<K, V>;
@@ -483,7 +529,7 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 			const resolved = (valueResolver as Function)(value);
 
 			tmp.emplace(resolved, {
-				insert: () => [key, value] as any,
+				insert: () => [key, value] as any
 			});
 		}
 

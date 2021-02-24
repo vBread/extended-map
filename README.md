@@ -42,9 +42,7 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - `Map.prototype.randomKey`
 - [`Map.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Map.prototype.reduce)
 - [`Map.prototype.some`](https://tc39.es/proposal-collection-methods/#Map.prototype.some)
-- `Map.prototype.toArray`
 - `Map.prototype.toJSON`
-- `Map.prototype.toKeyArray`
 - [`Map.prototype.uniqueBy`](https://github.com/tc39/proposal-array-unique)††
 
 \*For Map and WeakMap, if a method can be called on both keys and values, the method will target the Map's values by default and will have an implementation which targets the Map's keys (e.g., `.find` and `.findKey`)  
@@ -89,7 +87,6 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Set.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Set.prototype.reduce)
 - [`Set.prototype.some`](https://tc39.es/proposal-collection-methods/#Set.prototype.some)
 - [`Set.prototype.symmetricDifference`](https://tc39.es/proposal-set-methods/#Set.prototype.symmetricDifference)
-- `Set.prototype.toArray`
 - [`Set.prototype.union`](https://tc39.es/proposal-set-methods/#Set.prototype.union)
 
 \* Adapted to work with Set

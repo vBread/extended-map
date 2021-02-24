@@ -1,4 +1,4 @@
-import { CoercionHandler, EmplaceHandler } from './types';
+import { CoercionHandler, EmplaceHandler } from './util/types';
 
 /**
  * Collection of key/value pairs in which the keys are weakly referenced.
@@ -41,18 +41,16 @@ export class ExtendedWeakMap<K extends object, V> extends WeakMap<K, V> {
         return new ExtendedWeakMap<K, V>(entries)
     }
 
+	/**
+	 * Determines whether the passed value is a `WeakMap`.
+	 *
+	 * @param arg The value to be checked.
+	 * @returns `true` if the value is a `WeakMap`; otherwise `false`.
+	 */
 	public static isWeakMap(arg: any): arg is WeakMap<any, any>;
 	public static isWeakMap<K extends object, V>(arg: any): arg is WeakMap<K, V>;
 	public static isWeakMap(arg: any): arg is WeakMap<any, any> {
-		const methods = ['get', 'set', 'delete', 'has'];
-
-		// prettier-ignore
-		return (
-			arg
-			&& !('size' in arg)
-			&& arg[Symbol.toStringTag] === 'WeakMap'
-			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
-		)
+		return arg[Symbol.toStringTag] === 'WeakMap' && arg.toString() === '[object WeakMap]';
 	}
 
 	public static of(...args: [any, any][]): ExtendedWeakMap<any, any>;

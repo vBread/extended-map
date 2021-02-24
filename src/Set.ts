@@ -48,19 +48,16 @@ export class ExtendedSet<T> extends Set<T> {
 		return new ExtendedSet<T>(entries);
 	}
 
+	/**
+	 * Determines whether the passed value is a `Set`.
+	 *
+	 * @param arg The value to be checked.
+	 * @returns `true` if the value is a `Set`; otherwise `false`.
+	 */
 	public static isSet(arg: any): arg is Set<any>;
 	public static isSet<T>(arg: any): arg is Set<T>;
 	public static isSet(arg: any): arg is Set<any> {
-		const methods = ['has', 'add', 'forEach', 'delete', 'keys', 'values', 'entries', 'clear'];
-
-		// prettier-ignore
-		return (
-			arg
-			&& 'size' in arg
-			&& typeof arg.size === 'number'
-			&& arg[Symbol.toStringTag] === 'Set'
-			&& methods.every((method) => method in arg && typeof arg[method] === 'function')
-		)
+		return arg[Symbol.toStringTag] === 'Set' && arg.toString() === '[object Set]';
 	}
 
 	public static of(...args: any[]): ExtendedSet<any>;
@@ -92,7 +89,7 @@ export class ExtendedSet<T> extends Set<T> {
 			return undefined;
 		}
 
-		return this.toArray()[index];
+		return [...this.keys()][index];
 	}
 
 	public addAll(...values: T[]): this {
@@ -116,7 +113,7 @@ export class ExtendedSet<T> extends Set<T> {
 	public copyTo(target: T[], start: number): T[];
 	public copyTo(target: T[], start: number, count: number): T[];
 	public copyTo(target: any[], start?: number, count?: number): T[] {
-		return target.splice(start ?? target.length, 0, ...this.toArray().slice(0, count ?? this.size));
+		return target.splice(start ?? target.length, 0, [...this.keys()].slice(0, count ?? this.size));
 	}
 
 	/**
@@ -288,7 +285,7 @@ export class ExtendedSet<T> extends Set<T> {
 	}
 
 	public join(separator: string = ','): string {
-		return this.toArray().join(separator);
+		return [...this.keys()].join(separator);
 	}
 
 	public map(callbackfn: (value: T, key: T, set: this) => any): ExtendedSet<T>;
@@ -361,10 +358,6 @@ export class ExtendedSet<T> extends Set<T> {
 		}
 
 		return set;
-	}
-
-	public toArray(): T[] {
-		return [...this.values()];
 	}
 
 	public union(iterable: Iterable<T>): ExtendedSet<T>;
