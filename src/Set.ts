@@ -1,58 +1,99 @@
 import { inspect } from './util/constants';
+import { IterableCallback, IterableElements, Reducer } from './util/types';
 
 /**
- * Stores unique values of any type, whether primitive values or object references
+ * Stores unique elements of any type.
  *
- * @spec {@link https://tc39.es/ecma262/#sec-set-constructor ECMA-262}
+ * @spec {@link https://tc39.es/ecma262/#sec-set-constructor|ECMA-262}
  */
 export class ExtendedSet<T> extends Set<T> {
 	private readonly coerceValue: (value: T) => T;
 
 	/**
-	 * The number of (unique) elements in the `Set`
+	 * The number of unique elements in the Set.
 	 * @readonly
 	 *
-	 * @spec {@link https://tc39.es/ecma262/#sec-get-set.prototype.size ECMA-262}
+	 * @spec {@link https://tc39.es/ecma262/#sec-get-set.prototype.size|ECMA-262}
 	 */
 	public readonly size: number;
 
-	public constructor(iterable?: Iterable<T>);
-	public constructor(values?: ReadonlyArray<T>);
-	public constructor(entries: Iterable<T> | ReadonlyArray<T>, coerceValue: (value: T) => T);
-	public constructor(entries?: Iterable<T> | ReadonlyArray<T>, coerceValue?: (value: T) => T) {
-		super(entries);
+	/**
+	 * @param iterable - An array or other iterable object.
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set-iterable|ECMA-262}
+	 */
+	public constructor(iterable?: IterableElements<T>);
 
-		this.coerceValue = coerceValue;
+	/**
+	 * @param iterable - An array or other iterable object.
+	 * @param handler - An object containing a callback to normalize the values in the Set.
+	 * Normalization is applied when placing an element.
+	 *
+	 * @spec {@link https://tc39.es/proposal-collection-normalization/#sec-set-iterable|Stage 2 ECMAScript Proposal}
+	 */
+	public constructor(iterable: IterableElements<T>, coerceValue: (value: T) => T);
+	public constructor(iterable?: IterableElements<T>, coerceValue?: (value: T) => T) {
+		super(iterable);
+
+		this.coerceValue = coerceValue ?? ((value) => value);
 	}
 
-	private [inspect]() {
+	private [inspect](): Set<T> {
 		return new Set(this);
 	}
 
-	public static from<U, T = any>(iterable: Iterable<U>): ExtendedSet<T>;
-	public static from<U, T = any>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T): ExtendedSet<T>;
-	public static from<T>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T): ExtendedSet<T>;
-	public static from<U, S, T = any>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T, thisArg: S): ExtendedSet<T>;
-	public static from<T = any>(iterable: Iterable<any>, mapfn?: (value: any, index: number) => T, thisArg: any = this): ExtendedSet<T> {
-		const entries: T[] = [];
+	/**
+	 * Creates a new Set from a set-like or iterable object.
+	 *
+	 * @param iterable - A set-like or iterable object to convert.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-set.from|Stage 1 ECMAScript Proposal}
+	 */
+	public static from(iterable: Iterable<any>): ExtendedSet<unknown>;
+	public static from<U, T>(iterable: Iterable<U>): ExtendedSet<T>;
+
+	/**
+	 * Creates a new Set from a set-like or iterable object.
+	 *
+	 * @param iterable - A set-like or iterable object to convert.
+	 * @param mapfn - A function to execute on each element.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-set.from|Stage 1 ECMAScript Proposal}
+	 */
+	public static from<U, T>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T): ExtendedSet<T>;
+
+	/**
+	 * Creates a new Set from a set-like or iterable object.
+	 *
+	 * @param iterable - A set-like or iterable object to convert to a set.
+	 * @param mapfn - A function to execute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-set.from|Stage 1 ECMAScript Proposal}
+	 */
+	/* prettier-ignore */
+	public static from<U, S, T>(iterable: Iterable<U>, mapfn: (value: U, index: number) => T, thisArg: S): ExtendedSet<T>;
+	/* prettier-ignore */
+	public static from(iterable: Iterable<any>, mapfn?: (value: any, index: number) => unknown, thisArg: any = this): ExtendedSet<unknown> {
+		const elements: unknown[] = [];
 		let i = 0;
 
 		for (const item of iterable) {
 			if (mapfn) {
-				entries.push(mapfn.call(thisArg, item, i++));
+				elements.push(mapfn.call(thisArg, item, i++));
 			} else {
-				entries.push(item);
+				elements.push(item);
 			}
 		}
 
-		return new ExtendedSet<T>(entries);
+		return new ExtendedSet(elements);
 	}
 
 	/**
-	 * Determines whether the passed value is a `Set`.
+	 * Determines whether the passed value is a Set.
 	 *
-	 * @param arg The value to be checked.
-	 * @returns `true` if the value is a `Set`; otherwise `false`.
+	 * @param arg - The value to check.
+	 * @returns `true` if the value is a Set; otherwise `false`.
 	 */
 	public static isSet(arg: any): arg is Set<any>;
 	public static isSet<T>(arg: any): arg is Set<T>;
@@ -60,24 +101,48 @@ export class ExtendedSet<T> extends Set<T> {
 		return arg[Symbol.toStringTag] === 'Set' && arg.toString() === '[object Set]';
 	}
 
+	/**
+	 * Creates a new Set from a number of arguments.
+	 *
+	 * @param args - The elements to use during creation.
+	 *
+	 * @spec {@link https://tc39.es/proposal-setmap-offrom/#sec-set.of|Stage 1 ECMAScript Proposal}
+	 */
 	public static of(...args: any[]): ExtendedSet<any>;
 	public static of<T>(...args: T[]): ExtendedSet<T>;
-	public static of<T>(...args: T[]): ExtendedSet<T> {
-		return new ExtendedSet<T>(args);
+	public static of(...args: any[]): ExtendedSet<unknown> {
+		return new ExtendedSet(args);
 	}
 
 	/**
-	 * Appends a new element with a specified value to the end of the `Set`
+	 * Appends a new element with a specified value to the end of the Set.
 	 *
-	 * @param value The value of the element to add to the `Set`
-	 * @returns The `Set` with the added value
+	 * @param value - The value of the element to add.
 	 *
-	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.add ECMA-262}
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.add|ECMA-262}
 	 */
 	public add(value: T): this {
 		return super.add(this.coerceValue?.(value) ?? value);
 	}
 
+	/**
+	 * Appeneds a new element for each specified value to the end of the Set.
+	 *
+	 * @param values - The values of the elements to add.
+	 */
+	public addAll(...values: T[]): this {
+		for (const value of values) {
+			this.add(value);
+		}
+
+		return this;
+	}
+
+	/**
+	 * Returns the element at the specified zero-based and negative inclusive index.
+	 *
+	 * @param index - The index of the element to return.
+	 */
 	public at(index: number): T | undefined {
 		index = Math.trunc(index) ?? 0;
 
@@ -92,42 +157,65 @@ export class ExtendedSet<T> extends Set<T> {
 		return [...this.keys()][index];
 	}
 
-	public addAll(...values: T[]): this {
-		for (const value of values) {
-			this.add(value);
-		}
-
-		return this;
-	}
-
 	/**
-	 * Removes all elements from the `Set`
+	 * Removes all elements.
 	 *
-	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.clear ECMA-262}
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.clear|ECMA-262}
 	 */
 	public clear(): void {
 		return super.clear();
 	}
 
+	/**
+	 * Copies the elements of a Set to an array.
+	 *
+	 * @param target - The one-dimensional array that is the destination of the elements copied
+	 * from the Set.
+	 */
 	public copyTo(target: T[]): T[];
+
+	/**
+	 * Copies the elements of a Set to an array, starting at the specified array index.
+	 *
+	 * @param target - The one-dimensional array that is the destination of the elements copied
+	 * from the Set.
+	 * @param start - The zero-based index of `target` at which copying begins.
+	 */
 	public copyTo(target: T[], start: number): T[];
+
+	/**
+	 * Copies the specified number of elements of a Set to an array, starting at the specified array index.
+	 *
+	 * @param target - The one-dimensional array that is the destination of the elements copied
+	 * from the Set.
+	 * @param start - The zero-based index of `target` at which copying begins.
+	 * @param count - The number of elements to copy to `target`.
+	 */
 	public copyTo(target: T[], start: number, count: number): T[];
 	public copyTo(target: any[], start?: number, count?: number): T[] {
 		return target.splice(start ?? target.length, 0, [...this.keys()].slice(0, count ?? this.size));
 	}
 
 	/**
-	 * Removes a specified value from the `Set`, if it is in the set
+	 * Removes the specified element.
 	 *
-	 * @param value The value to remove from the `Set`
-	 * @returns `true` if `value` was already in the `Set`; otherwise `false`
+	 * @param value - The element to remove.
+	 * @returns `true` if the element existed and has been removed, or `false` if the element
+	 * doesn't exist.
 	 *
-	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.delete ECMA-262}
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.delete|ECMA-262}
 	 */
 	public delete(value: T): boolean {
 		return super.delete(this.coerceValue?.(value) ?? value);
 	}
 
+	/**
+	 * Removes the specified elements.
+	 *
+	 * @param values - The elements to remove.
+	 * @returns `true` if each element existed and have been removed, or `false` if an element
+	 * didn't exist.
+	 */
 	public deleteAll(...values: T[]): boolean {
 		let finished = true;
 
@@ -138,6 +226,11 @@ export class ExtendedSet<T> extends Set<T> {
 		return !!finished;
 	}
 
+	/**
+	 *
+	 * @param iterable -
+	 * @returns
+	 */
 	public difference(iterable: Iterable<T>): ExtendedSet<T>;
 	public difference<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public difference(iterable: Iterable<any>): ExtendedSet<T> {
@@ -150,9 +243,23 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public every(predicate: (value: T, key: T, set: this) => boolean): boolean;
-	public every<T>(predicate: (value: T, key: T, set: this) => boolean, thisArg: T): boolean;
-	public every(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): boolean {
+	/**
+	 * Tests whether all elements pass the test implemented by a provided function.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 * @returns `true` if the callback returns truthy for at least one element; otherwise, `false`.
+	 */
+	public every(predicate: IterableCallback<T, T, this, boolean>): boolean;
+
+	/**
+	 * Tests whether all elements pass the test implemented by a provided function.
+	 *
+	 * @param predicate - A function to execute for each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 * @returns `true` if the callback returns truthy for at least one element; otherwise, `false`.
+	 */
+	public every<T>(predicate: IterableCallback<T, T, this, boolean>, thisArg: T): boolean;
+	public every(predicate: IterableCallback<T, T, this, boolean>, thisArg: any = this): boolean {
 		for (const value of this) {
 			if (!predicate.call(thisArg, value, value, this)) {
 				return false;
@@ -162,9 +269,21 @@ export class ExtendedSet<T> extends Set<T> {
 		return true;
 	}
 
-	public filter(predicate: (value: T, key: T, set: this) => boolean): ExtendedSet<T>;
-	public filter<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): ExtendedSet<T>;
-	public filter(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): ExtendedSet<T> {
+	/**
+	 * Creates a new Set with all elements that pass the test implemented by a provided function.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 */
+	public filter(predicate: IterableCallback<T, T, this, boolean>): ExtendedSet<T>;
+
+	/**
+	 * Creates a new Set with all elements that pass the test implemented by a provided function.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 */
+	public filter<U>(predicate: IterableCallback<T, T, this, boolean>, thisArg: U): ExtendedSet<T>;
+	public filter(predicate: IterableCallback<T, T, this, boolean>, thisArg: any = this): ExtendedSet<T> {
 		const set = new ExtendedSet<T>();
 
 		for (const value of this) {
@@ -176,23 +295,21 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public filterOut(predicate: (value: T, key: T, set: this) => boolean): ExtendedSet<T>;
-	public filterOut<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): ExtendedSet<T>;
-	public filterOut(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): ExtendedSet<T> {
-		const set = new ExtendedSet<T>();
+	/**
+	 * Returns the first element that satisfies a provided function.
+	 *
+	 * @param predicate - A function to excute on each element.
+	 */
+	public find(predicate: IterableCallback<T, T, this, boolean>): T | undefined;
 
-		for (const value of this) {
-			if (!predicate.call(thisArg, value, value, this)) {
-				set.add(value);
-			}
-		}
-
-		return set;
-	}
-
-	public find(predicate: (value: T, key: T, set: this) => boolean): T | undefined;
-	public find<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): T | undefined;
-	public find(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): T | undefined {
+	/**
+	 * Returns the first element that satisfies a provided function.
+	 *
+	 * @param predicate - A function to excute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 */
+	public find<U>(predicate: IterableCallback<T, T, this, boolean>, thisArg: U): T | undefined;
+	public find(predicate: IterableCallback<T, T, this, boolean>, thisArg: any = this): T | undefined {
 		for (const value of this) {
 			if (predicate.call(thisArg, value, value, this)) {
 				return value;
@@ -203,30 +320,34 @@ export class ExtendedSet<T> extends Set<T> {
 	}
 
 	/**
-	 * Executes a provided function once for each value in the `Set`, in insertion order
+	 * Executes a provided function once for each element, in insertion order.
 	 *
-	 * @param callbackfn Function to execute for each element, taking three arguments
-	 * 		  - `value`, `key`: The current element being processed in the `Set`.
-	 * 			 As there are no keys in `Set`, the value is passed for both arguments
-	 * 		  - `set`: The `Set` which `forEach()` was called upon
-	 * @param thisArg Value to use as `this` when executing `callback`
+	 * @param callbackfn - A function to execute on each element.
 	 *
-	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.foreach ECMA-262}
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.foreach|ECMA-262}
 	 */
-	public forEach<U = any>(callbackfn: (value: T, key: T, set: this) => U): void;
-	public forEach<U>(callbackfn: (value: T, key: T, set: this) => any, thisArg: U): void;
-	public forEach<R, U>(callbackfn: (value: T, key: T, set: this) => R, thisArg: U): void;
-	public forEach(callbackfn: (value: T, key: T, set: this) => any, thisArg: any = this): void {
+	public forEach(callbackfn: IterableCallback<T, T, this, void>): void;
+
+	/**
+	 * Executes a provided function once for each element, in insertion order.
+	 *
+	 * @param callbackfn - A function to execute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 *
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.foreach|ECMA-262}
+	 */
+	public forEach<U>(callbackfn: IterableCallback<T, T, this, void>, thisArg: U): void;
+	public forEach(callbackfn: IterableCallback<T, T, this, void>, thisArg: any = this): void {
 		return super.forEach(callbackfn, thisArg);
 	}
 
 	/**
-	 * Returns a boolean indicating whether an element with the specified value exists in the `Set` or not
+	 * Indicates if an element exists.
 	 *
-	 * @param value The value to test for presence in the `Set`
-	 * @returns `true` if an element with the specified value exists in the `Set`; otherwise `false`
+	 * @param value - The value of the element to test for presence.
+	 * @returns `true` if an element exists; otherwise `false`.
 	 *
-	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.has ECMA-262}
+	 * @spec {@link https://tc39.es/ecma262/#sec-set.prototype.has|ECMA-262}
 	 */
 	public has(value: T): boolean {
 		return super.has(this.coerceValue?.(value) ?? value);
@@ -288,11 +409,23 @@ export class ExtendedSet<T> extends Set<T> {
 		return [...this.keys()].join(separator);
 	}
 
-	public map(callbackfn: (value: T, key: T, set: this) => any): ExtendedSet<T>;
-	public map<T>(callbackfn: (value: T, key: T, set: this) => T): ExtendedSet<T>;
-	public map<U>(callbackfn: (value: T, key: T, set: this) => any, thisArg: U): ExtendedSet<T>;
-	public map<T, U>(callbackfn: (value: T, key: T, set: this) => T, thisArg: U): ExtendedSet<T>;
-	public map(callbackfn: (value: T, key: T, set: this) => any, thisArg: any = this): ExtendedSet<T> {
+	/**
+	 * Creates a new Set populated with the results of calling a provided function on each element.
+	 *
+	 * @param callbackfn - A function to execute on each element.
+	 */
+	public map(callbackfn: IterableCallback<T, T, this, any>): ExtendedSet<T>;
+	public map<T>(callbackfn: IterableCallback<T, T, this, T>): ExtendedSet<T>;
+
+	/**
+	 * Creates a new Set populated with the results of calling a provided function on each element.
+	 *
+	 * @param callbackfn - A function to execute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 */
+	public map<U>(callbackfn: IterableCallback<T, T, this, any>, thisArg: U): ExtendedSet<T>;
+	public map<T, U>(callbackfn: IterableCallback<T, T, this, T>, thisArg: U): ExtendedSet<T>;
+	public map(callbackfn: IterableCallback<T, T, this, any>, thisArg: any = this): ExtendedSet<T> {
 		const set = new ExtendedSet<T>();
 
 		for (const value of this) {
@@ -302,9 +435,23 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
-	public partition(predicate: (value: T, key: T, set: this) => boolean): [ExtendedSet<T>, ExtendedSet<T>];
-	public partition<U>(predicate: (value: T, key: T, set: this) => boolean, thisArg: U): [ExtendedSet<T>, ExtendedSet<T>];
-	public partition(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): [ExtendedSet<T>, ExtendedSet<T>] {
+	/**
+	 * Creates two new Sets with elements that failed or passed a provided function respectively.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 */
+	public partition(predicate: IterableCallback<T, T, this, boolean>): [ExtendedSet<T>, ExtendedSet<T>];
+
+	/**
+	 * Creates two new Sets with elements that failed or passed a provided function respectively.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 */
+	/* prettier-ignore */
+	public partition<U>(predicate: IterableCallback<T, T, this, boolean>, thisArg: U): [ExtendedSet<T>, ExtendedSet<T>];
+	/* prettier-ignore */
+	public partition(predicate: IterableCallback<T, T, this, boolean>, thisArg: any = this): [ExtendedSet<T>, ExtendedSet<T>] {
 		const [passed, failed] = [new ExtendedSet<T>(), new ExtendedSet<T>()];
 
 		for (const value of this) {
@@ -318,27 +465,87 @@ export class ExtendedSet<T> extends Set<T> {
 		return [passed, failed];
 	}
 
-	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: this) => U): U;
-	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: this) => U, initialValue: U): U;
-	public reduce<U>(callbackfn: (memo: U, value: T, key: T, set: this) => U, initialValue?: U): U {
-		let initial: boolean = !!initialValue;
-		let accumulator = initial ? initialValue : undefined;
+	/**
+	 * Returns a random element.
+	 */
+	public random(): T;
+
+	/**
+	 * Returns a specified amount of random elements.
+	 *
+	 * @param amount - The amount of elements to return.
+	 */
+	public random(amount: number): T[];
+	public random(amount: number = 1): T | T[] {
+		const elements = [...this.values()];
+		const results: T[] = [];
+
+		for (let i = 0; i < amount; i++) {
+			results.push(elements[Math.floor(Math.random() * elements.length)]);
+		}
+
+		if (results.length <= 1) {
+			return results[1] ?? results[0];
+		}
+
+		return results;
+	}
+
+	/**
+	 * Executes a provided function on each element, resulting in a single output value.
+	 *
+	 * @param callbackfn - A function to execute on each element excluding the first.
+	 * @returns The single value that results from the reduction.
+	 */
+	public reduce(callbackfn: Reducer<T, T, this>): T;
+	public reduce<U>(callbackfn: Reducer<T, T, this, U>): U;
+
+	/**
+	 * Executes a provided function on each element, resulting in a single output value.
+	 *
+	 * @param callbackfn - A function to execute on each element excluding the first.
+	 * @param initialValue - A value to use as the first argument to the first call of the callback.
+	 * If no `initialValue` is provided, the first value will be used as the initial accumulator
+	 * value and skipped as `value`.
+	 * @returns The single value that results from the reduction.
+	 */
+	public reduce(callbackfn: Reducer<T, T, this>, initialValue: T): T;
+	public reduce<U>(callbackfn: Reducer<T, T, this, U>, initialValue: U): U;
+	public reduce(callbackfn: Reducer<T, T, this>, initialValue?: T): T {
+		if (this.size === 0 && !initialValue) {
+			throw new TypeError('Cannot reduce an empty Set with no initialValue');
+		}
+
+		let accumulator = initialValue ?? undefined;
 
 		for (const value of this) {
-			if (initial) {
+			if (accumulator) {
 				accumulator = callbackfn(accumulator, value, value, this);
 			} else {
-				initial = false;
-				accumulator = (value as unknown) as U;
+				accumulator = value;
 			}
 		}
 
 		return accumulator;
 	}
 
-	public some(predicate: (value: T, key: T, set: this) => boolean): boolean;
-	public some<T>(predicate: (value: T, key: T, set: this) => boolean, thisArg: T): boolean;
-	public some(predicate: (value: T, key: T, set: this) => boolean, thisArg: any = this): boolean {
+	/**
+	 * Tests whether at least one element passes the test implemented by a provided function.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 * @returns `true` if the callback returns truthy for at least one element; otherwise, `false`.
+	 */
+	public some(predicate: IterableCallback<T, T, this, boolean>): boolean;
+
+	/**
+	 * Tests whether at least one element passes the test implemented by a provided function.
+	 *
+	 * @param predicate - A function to execute on each element.
+	 * @param thisArg - A value to use as `this` when executing the callback.
+	 * @returns `true` if the callback returns truthy for at least one element; otherwise, `false`.
+	 */
+	public some<T>(predicate: IterableCallback<T, T, this, boolean>, thisArg: T): boolean;
+	public some(predicate: IterableCallback<T, T, this, boolean>, thisArg: any = this): boolean {
 		for (const value of this) {
 			if (predicate.call(thisArg, value, value, this)) {
 				return true;
@@ -348,6 +555,12 @@ export class ExtendedSet<T> extends Set<T> {
 		return false;
 	}
 
+	/**
+	 * Creates a new Set with elements that are in either the original Set or `iterable`, but not in
+	 * their intersection.
+	 *
+	 * @param iterable -
+	 */
 	public symmetricDifference(iterable: Iterable<T>): ExtendedSet<T>;
 	public symmetricDifference<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public symmetricDifference(iterable: Iterable<any>): ExtendedSet<T> {
@@ -360,6 +573,11 @@ export class ExtendedSet<T> extends Set<T> {
 		return set;
 	}
 
+	/**
+	 * Creates a new Set from the unique elements in the original Set and `iterable`.
+	 *
+	 * @param iterable -
+	 */
 	public union(iterable: Iterable<T>): ExtendedSet<T>;
 	public union<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public union(iterable: Iterable<any>): ExtendedSet<T> {
