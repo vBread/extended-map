@@ -22,9 +22,9 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Map.prototype.emplace`](https://tc39.es/proposal-upsert/#sec-map.prototype.emplace)
 - [`Map.prototype.every`](https://tc39.es/proposal-collection-methods/#Map.prototype.every)
 - [`Map.prototype.filter`](https://tc39.es/proposal-collection-methods/#Map.prototype.filter)
-- [`Map.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)††
 - [`Map.prototype.findKey`](https://tc39.es/proposal-collection-methods/#Map.prototype.findKey)
 - [`Map.prototype.find`](https://tc39.es/proposal-collection-methods/#Map.prototype.find)
+- `Map.prototype.hasAll`
 - [`Map.prototype.includes`](https://tc39.es/proposal-collection-methods/#Map.prototype.includes)
 - [`Map.prototype.keyOf`](https://tc39.es/proposal-collection-methods/#Map.prototype.keyOf)
 - [`Map.prototype.mapKeys`](https://tc39.es/proposal-collection-methods/#Map.prototype.mapKeys)
@@ -35,7 +35,6 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - `Map.prototype.randomKey`
 - [`Map.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Map.prototype.reduce)
 - [`Map.prototype.some`](https://tc39.es/proposal-collection-methods/#Map.prototype.some)
-- `Map.prototype.toJSON`
 - [`Map.prototype.uniqueBy`](https://github.com/tc39/proposal-array-unique)††
 
 \*For Map and WeakMap, if a method can be called on both keys and values, the method will target the Map's values by default and will have an implementation which targets the Map's keys (e.g., `.find` and `.findKey`)  
@@ -70,13 +69,14 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Set.prototype.filter`](https://tc39.es/proposal-collection-methods/#Set.prototype.filter)
 - [`Set.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)\*
 - [`Set.prototype.find`](https://tc39.es/proposal-collection-methods/#Set.prototype.find)
+- `Set.prototype.hasAll`
 - [`Set.prototype.intersection`](https://tc39.es/proposal-set-methods/#Set.prototype.intersection)
 - [`Set.prototype.isDisjointFrom`](https://tc39.es/proposal-set-methods/#Set.prototype.isDisjointFrom)
 - [`Set.prototype.isSubsetOf`](https://tc39.es/proposal-set-methods/#Set.prototype.isSubsetOf)
 - [`Set.prototype.isSupersetOf`](https://tc39.es/proposal-set-methods/#Set.prototype.isSupersetOf)
 - [`Set.prototype.join`](https://tc39.es/proposal-collection-methods/#Set.prototype.join)
 - [`Set.prototype.map`](https://tc39.es/proposal-collection-methods/#Set.prototype.map)
-- [`Set.prototype.partition`]
+- `Set.prototype.partition`
 - [`Set.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Set.prototype.reduce)
 - [`Set.prototype.some`](https://tc39.es/proposal-collection-methods/#Set.prototype.some)
 - [`Set.prototype.symmetricDifference`](https://tc39.es/proposal-set-methods/#Set.prototype.symmetricDifference)

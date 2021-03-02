@@ -406,6 +406,22 @@ export class ExtendedMap<K, V> extends Map<K, V> {
 	}
 
 	/**
+	 * Indicates if a value for each specified key exists.
+	 *
+	 * @param keys - The keys of the values to test for presence.
+	 * @returns `true` if each value with the specified key exists; otherwise `false`.
+	 */
+	public hasAll(keys: K[]): boolean {
+		for (const key of keys) {
+			if (!this.has(key)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Indicates if a value with the specified `searchValue` exists.
 	 *
 	 * @param value - The value to test for presence.

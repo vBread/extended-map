@@ -352,6 +352,22 @@ export class ExtendedSet<T> extends Set<T> {
 		return super.has(this.coerceValue?.(value) ?? value);
 	}
 
+	/**
+	 * Indicates if each element exists.
+	 *
+	 * @param values - The values of the elements to test for presence.
+	 * @returns `true` if each element exists; otherwise `false`.
+	 */
+	public hasAll(values: T[]): boolean {
+		for (const value of values) {
+			if (!this.has(value)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	public intersection(iterable: Iterable<T>): ExtendedSet<T>;
 	public intersection<U>(iterable: Iterable<U>): ExtendedSet<T>;
 	public intersection(iterable: Iterable<any>): ExtendedSet<T> {
