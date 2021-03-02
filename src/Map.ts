@@ -1,15 +1,15 @@
-import { inspect } from './util/constants';
 import {
 	CoercionHandler,
 	Comparator,
 	EmplaceHandler,
 	Indexer,
+	inspect,
 	IterableCallback,
 	IterableEntries,
 	Reducer,
 	Resolver,
 	ValueResolver,
-} from './util/types';
+} from './util';
 
 /**
  * Holds key-value pairs and remembers the original insertion order of the keys.

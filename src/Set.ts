@@ -1,5 +1,4 @@
-import { inspect } from './util/constants';
-import { IterableCallback, IterableElements, Reducer } from './util/types';
+import { inspect, IterableCallback, IterableElements, Reducer } from './util';
 
 /**
  * Stores unique elements of any type.

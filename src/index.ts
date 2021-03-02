@@ -1,4 +1,3 @@
-export * from './util/types';
-
+export * from './util';
 export * from './Map';
 export * from './Set';

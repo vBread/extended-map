@@ -1,5 +1,6 @@
-import { ExtendedMap } from '../Map';
-import { ExtendedSet } from '../Set';
+import { ExtendedMap, ExtendedSet } from './';
+
+export const inspect: unique symbol = Symbol.for('nodejs.util.inspect.custom');
 
 /**
  * Map
