@@ -36,14 +36,16 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Map.prototype.reduce`](https://tc39.es/proposal-collection-methods/#Map.prototype.reduce)
 - [`Map.prototype.some`](https://tc39.es/proposal-collection-methods/#Map.prototype.some)
 - [`Map.prototype.uniqueBy`](https://github.com/tc39/proposal-array-unique)††
+- [`Map.prototype.update`](https://tc39.es/proposal-collection-methods/#Map.prototype.update)
 
-\*For Map and WeakMap, if a method can be called on both keys and values, the method will target the Map's values by default and will have an implementation which targets the Map's keys (e.g., `.find` and `.findKey`)  
+\*If a method can be called on both keys and values, the method will target the Map's values by default and will have an implementation which targets the Map's keys (e.g., `.find` and `.findKey`)  
 † `.mapValues` is called `.map` for consistency  
 †† Adapted to work with Map
 
 ## Planned
 
 - `Map.prototype.flat`
+- `Map.prototype.flatMap`
 
 <!-- markdownlint-disable-next-line -->
 # Set
@@ -67,7 +69,6 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 - [`Set.prototype.difference`](https://tc39.es/proposal-set-methods/#Set.prototype.difference)
 - [`Set.prototype.every`](https://tc39.es/proposal-collection-methods/#Set.prototype.every)
 - [`Set.prototype.filter`](https://tc39.es/proposal-collection-methods/#Set.prototype.filter)
-- [`Set.prototype.filterOut`](https://github.com/tc39/proposal-array-filtering)\*
 - [`Set.prototype.find`](https://tc39.es/proposal-collection-methods/#Set.prototype.find)
 - `Set.prototype.hasAll`
 - [`Set.prototype.intersection`](https://tc39.es/proposal-set-methods/#Set.prototype.intersection)
@@ -87,6 +88,5 @@ Modern polyfills of [Stage 1 Collection Methods](https://github.com/zloirock/cor
 <!-- markdownlint-disable-next-line -->
 ## Planned
 
-- `Set.prototype.first`
 - `Set.prototype.flat`
-- `Set.prototype.last`
+- `Set.prototype.flatMap`
