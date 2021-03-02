@@ -19,13 +19,12 @@ export interface EmplaceHandler<K, V> {
 
 export interface CoercionHandler<K, V> {
 	/**
-	 * A function to normalize a value during placement.
+	 * A function to normalize a key when attempting to be found.
 	 */
 	coerceKey?(key?: K): K;
 
 	/**
-	 * A function to normalize a key when attempting to be found.
-	 * @private @readonly
+	 * A function to normalize a value during placement.
 	 */
 	coerceValue?(value?: V): V;
 }
